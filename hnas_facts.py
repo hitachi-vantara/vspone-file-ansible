@@ -9,73 +9,240 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_get_system_facts
-
-short_description: This is my test module
-
+module: hnas_facts
+short_description: This module gathers various facts about Hitachi NAS virtual servers
+description:
+  - The hnas_facts module gathers various facts about Hitachi NAS virtual servers.
 version_added: "0.1"
-
-short_description: Get facts about a Hitachi NAS Cluster
-
+author:
+  - Hitachi Vantara, LTD.
+requirements:
 options:
   api_key:
-    required: false
     description:
-    - The REST API application key.
-  api_username:
+    - The REST API authentication key - the preferred authentication method.
+    type: str
     required: false
+  api_username:
     description:
     - The username to authenticate with the REST API.
-  api_password:
+    type: str
     required: false
+  api_password:
     description:
     - The password to authenticate with the REST API.
-  admin_vnode_address:
-    required: true
-    description:
-    - The the name or IP address of the admin vnode to access the REST API.
-    example:
-    - nas1.mycompany.com
-    - 10.0.0.1
-  validate_certs:
+    type: str
     required: false
-    default: true
+  api_url:
+    description:
+    - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
+    type: str
+    required: true
+    example:
+    - https://10.1.2.3:8444/v7
+  validate_certs:
     description:
     - Should https certificates be validated?
+    type: bool
+    required: false
+    default: true
+  fact_type:
+    description:
+    - A list of required facts.  Valid list items are:
+    - system_facts         - gather details about the HNAS cluster, including node information
+    - virtual_server_facts - gather details about the virtual servers hosted on the cluster
+    - system_drive_facts   - gather details about the system drives visible to the cluster
+    - storage_pool_facts   - gather details about the storage pools hosted on the cluster
+    - filesystem_facts     - gather details about the filesystems hosted on the cluster
+    - nfs_export_facts     - gather details of NFS exports hosted on a particular virtual server
+    - cifs_share_facts     - gather details of SMB/CIFS shares hosts on a particular virtual server
+    - snapshot_facts       - gather a list of snapshots present on s particular filesystem
+    - network_port_facts   - gather a list of the physical network ports available to each cluster node
+    - aggregate_port_facts - gather a list of the aggregate network ports available to each cluster node
+    type: list
+    required: true
+  data:
+    description:
+    - Provides additional data when facts to be gathered are associated with a specific resource
+    required: false
+    type: dict
+    suboptions:
+      filesystemId:
+        description: filesystemId of a filesystem - required when retrieving snapshot_facts, otherwise not required
+        type: str
+      virtualServerId:
+        description: virtualServerId parameter of a virtual server - required when retrieving nfs_export_facts or smb_share_facts, otherwise not required
+        type: int
 
-description:
-    - Return various information about a Hitachi NAS cluster (eg, configuration, volumes, file systems)
-
-
-author:
-    - Phil Cobley 
 '''
 
 EXAMPLES = '''
-    - name: Get cluster facts using api key
-      hnas_facts:
-        admin_vnode_address: "{{ hnas_admin__vnode_address }}"
-        api_key: "{{ hnas_api_key }}"
-        validate_certs: "{{ validate_certs }}"
+- name: Get Hitachi NAS network aggregate ports
+  hosts: localhost
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_facts: 
+      <<: *login
+      fact_type:
+        - aggregate_port_facts
+    register: result
+  - debug: var=result.ansible_facts
 
-    - name: Get cluster facts using username and password
-      hnas_facts:
-        admin_vnode_address: "{{ hnas_admin__vnode_address }}"
-        api_username: "{{ netapp_api_username }}"
-        api_password: "{{ netapp_api_password }}"
-        validate_certs: "{{ validate_certs }}"
+
+- name: Get Hitachi NAS system information
+  hosts: localhost
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_facts: 
+      <<: *login
+      fact_type:
+        - system_facts
+    register: result
+  - debug: var=result.ansible_facts
+
+
+- name: Get NFS Export details for virtual server 1
+  hosts: localhost
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_facts: 
+      <<: *login
+      fact_type:
+        - nfs_export_facts
+      data:
+        virtualServerId: 1
+    register: result
+  - debug: var=result.ansible_facts
 
 '''
 
 RETURN = '''
-original_message:
-    description: The original name param that was passed in
-    type: str
-    returned: always
-message:
-    description: Gathered facts for <NASClusterID>.
-    type: str
-    returned: always
+[root@localhost ~]# ansible-playbook hv_get_aggregate_facts.yml
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+PLAY [localhost] ************************************************************************************************************************************************
+
+TASK [Gathering Facts] ******************************************************************************************************************************************
+ok: [localhost]
+
+TASK [Get Hitachi NAS network aggregate ports] ******************************************************************************************************************
+ok: [localhost]
+
+TASK [debug] ****************************************************************************************************************************************************
+ok: [localhost] => {
+    "result.ansible_facts": {
+        "aggregatePorts": [
+            "ag1",
+            "ag1-vlan0099",
+            "ag2"
+        ]
+    }
+}
+
+PLAY RECAP ******************************************************************************************************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+[root@localhost ~]# ansible-playbook hv_get_system_facts.yml
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+PLAY [Get Hitachi NAS system information] ***********************************************************************************************************************
+
+TASK [Gathering Facts] ******************************************************************************************************************************************
+ok: [localhost]
+
+TASK [hnas_facts] ***********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [debug] ****************************************************************************************************************************************************
+ok: [localhost] => {
+    "result.ansible_facts": {
+        "nodes": [
+            {
+                "UUID": "48fbe624-4c33-11d0-9001-9c5547075e75",
+                "firmwareVersion": "13.9.6813.00",
+                "ipAddresses": [
+                    "172.27.5.10"
+                ],
+                "model": "3090-G2",
+                "name": "mercury110n1-1",
+                "nodeId": 1,
+                "objectId": "313a3a3a3a3a3a303a3a3a4f49445f24232140255f56",
+                "serial": "M2SEKW1238092",
+                "status": "ONLINE"
+            }
+        ],
+        "system": {
+            "clusterUUID": "48fbe624-4c33-11d0-9000-9c5547075e75",
+            "firmwareVersion": "13.9.6813.00",
+            "isCluster": false,
+            "licenses": [
+                "CIFS",
+                "NFS",
+                "FILE_CLONE",
+                "BASE_DEDUPLICATION",
+            ],
+            "model": "3090-G2",
+            "name": "mercury110n1",
+            "nodeCount": 1,
+            "storageHealth": "ROBUST",
+            "vendor": "HITACHI"
+        }
+    }
+}
+
+PLAY RECAP ******************************************************************************************************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+[root@localhost ~]# ansible-playbook hv_get_nfs_export_facts.yml
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+PLAY [Get NFS Export details for virtual server 1] **************************************************************************************************************
+
+TASK [Gathering Facts] ******************************************************************************************************************************************
+ok: [localhost]
+
+TASK [hnas_facts] ***********************************************************************************************************************************************
+ok: [localhost]
+
+TASK [debug] ****************************************************************************************************************************************************
+ok: [localhost] => {
+    "result.ansible_facts": {
+        "nfsExports": [
+            {
+                "filesystemId": "075E4D861BBF9C360000000000000000",
+                "name": "/nfse",
+                "objectId": "313a3a3a36333463396164632d306332312d313164372d396437642d3963353534373037356537353a3a3a303a3a3a4f49445f24232140255f56",
+                "path": "/",
+                "settings": {
+                    "accessConfig": "*(rw)",
+                    "localReadCacheOption": "DISABLED",
+                    "snapshotOption": "SHOW_AND_ALLOW_ACCESS",
+                    "transferToReplicationTargetSetting": "USE_FS_DEFAULT"
+                },
+                "shareId": "634c9adc-0c21-11d7-9d7d-9c5547075e75",
+                "virtualServerId": 1
+            }
+        ]
+    }
+}
+
+PLAY RECAP ******************************************************************************************************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
 '''
 
 import json
