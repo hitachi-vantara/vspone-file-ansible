@@ -6,7 +6,7 @@ import time
 class HNASFileServer:
 
 # api_url is a standard Ansible parameter - required form https://172.27.1.1:8444/v7
-    def __init__(self, api_url, verify=False):
+    def __init__(self, api_url, verify=True):
         p = re.compile(r'(?P<protocol>http[s]?)://(?P<address>[0-9a-zA-Z.-]+):(?P<port>\d+)/v(?P<version>\d)')
         m = p.match(api_url)
         assert m != None, "api_url is not of the correct format - http[s]://<address>:<port>/v<api-version>"
@@ -89,6 +89,8 @@ class HNASFileServer:
         
     def get_unit_multiplier(self, unit):
         unit = unit.lower()
+        if unit == "b" or unit == "bytes":
+            return 1
         if unit == "k" or unit == "kb":
             return 1000
         if unit == "kib":
@@ -201,11 +203,14 @@ class HNASFileServer:
             if share['path'] == data['filesystemPath'] and share['filesystemId'] == data['filesystemId']:
                 return False, True, share
             else:
+###################
+# should try to do an update if parameters don't match
+
                 return False, False, share
         settings = {}
         settings['accessConfig'] = params.get('accessConfig', "")
         settings['snapshotOption'] = params.get('snapshotOption', "SHOW_AND_ALLOW_ACCESS")
-        settings['transferToReplicationTargetSetting'] = params.get('transferToReplicationTargetSetting', "DO_NOT_TRANSFER")
+        settings['transferToReplicationTargetSetting'] = params.get('transferToReplicationTargetSetting', "USE_FS_DEFAULT")
         if type == "nfs":
             settings['localReadCacheOption'] = params.get('localReadCacheOption', "DISABLED")
         elif type == "cifs":
@@ -416,7 +421,7 @@ class HNASFileServer:
             assert 'storagePoolId' in params, "Missing 'storagePoolId' data value"
             data['storagePoolId'] = params['storagePoolId']
         assert 'capacity' in params, "Missing 'capacity' data value"
-        data['capacity'] = self.get_unit_multiplier(params.get('capacity_unit', '')) * int(params['capacity'])
+        data['capacity'] = self.get_unit_multiplier(params.get('capacity_unit', 'bytes')) * int(params['capacity'])
         status = params.get('status', 'MOUNTED')
         blockSize = params.get('blockSize', '4')
         blockSizeInK = str(int(blockSize) * 1024)
@@ -470,7 +475,7 @@ class HNASFileServer:
         if len(pool_list['storagePools']) != 0:  # already there, so can be considered present
             pool = pool_list['storagePools'][0]
 # should get list of system drives, and compare
-            if 'chunkSize' in params and pool['chuisAssignedToStoragePoolnkSize'] != data['chunkSize']:
+            if 'chunkSize' in params and pool['chunkSize'] != data['chunkSize']:
                 return False, False, ""
             url = self.base_uri + "storage-pools/{}/system-drives".format(pool['objectId'])
             sd_list = self.simple_get(url)
@@ -490,7 +495,7 @@ class HNASFileServer:
             assert len(sd_list['systemDrives']) != 0, "system drive not found '{}'".format(systemDriveId)
             system_drive = sd_list['systemDrives'][0]
             assert system_drive['isAssignedToStoragePool'] == False, "system drive '{}' already in use".format(systemDriveId)
-            if params['allow_denied_system_drives'] is True and system_drive['isAccessAllowed'] == False:
+            if 'allow_denied_system_drives' in params and params['allow_denied_system_drives'] is True and system_drive['isAccessAllowed'] == False:
                 url = self.base_uri + "system-drives/{}".format(systemDriveId)
                 sd_data = {'enableAccess':True}
                 self.simple_patch(url, 204, data=sd_data)
