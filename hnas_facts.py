@@ -73,7 +73,10 @@ options:
       virtualServerId:
         description: virtualServerId parameter of a virtual server - required when retrieving nfs_export_facts or smb_share_facts, otherwise not required
         type: int
-
+      include_share_authentications:
+        description: Set to true to include the share access authentications for each share
+        type: bool
+        default: false
 '''
 
 EXAMPLES = '''
@@ -281,12 +284,14 @@ def main():
     virtualServerId = None
     name = None
     filesystemId = None
+    include_share_authentications = False
     if 'data' in params and params['data'] != None:
         variables = params['data']
         label = variables.get('label', None)
         name = variables.get('name', None)
         virtualServerId = variables.get('virtualServerId', None)
         filesystemId = variables.get('filesystemId', None)
+        include_share_authentications = variables.get('include_share_authentications', False)
 
     facts = {}
     try:
@@ -308,7 +313,7 @@ def main():
             facts['nfsExports'] = hnas.get_exports(virtualServerId, name=name)['filesystemShares']
         if 'cifs_share_facts' in fact_type:
             assert virtualServerId != None, "Missing 'virtualServerId' data value"
-            facts['cifsShares'] = hnas.get_shares(virtualServerId, name=name)['filesystemShares']
+            facts['cifsShares'] = hnas.get_shares(virtualServerId, name=name, include_share_authentications=include_share_authentications)['filesystemShares']
         if 'snapshot_facts' in fact_type:
             assert filesystemId != None, "Missing 'filesystemId' data value"
             facts['snapshots'] = hnas.get_snapshots(filesystemId)['snapshots']

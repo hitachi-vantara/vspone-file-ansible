@@ -48,8 +48,8 @@ options:
     default: true
   state:
     description:
-    - set state to C(present) to ensure the existance of a filesystem, and that it is at least the requested size
-    - set state to C(absent) to ensure that specific filesystem is not present on the server
+    - set state to C(present) to ensure the existance of a share/export, and that it is in the requested state/configuration
+    - set state to C(absent) to ensure that specific share/export is not present on the server
     type: str
     required: true
     choices: ['present', 'absent']
@@ -308,7 +308,7 @@ def main():
         hnas = server.HNASFileServer(api_url, verify=validate_certs)
         hnas.set_credentials(api_key, api_username, api_password)
         if state == "absent":
-            changed = hnas.delete_share_or_export(virtualServerId, type, name)
+            changed, share = hnas.delete_share_or_export(virtualServerId, type, variables)
         elif state == "present":
             changed, success, share = hnas.create_share_or_export(virtualServerId, type, variables)
             assert success == True, "An existing share/export exists, with the same name, but the parameters do not match"

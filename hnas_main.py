@@ -64,6 +64,14 @@ class HNASFileServer:
             return name
         return ''.join(['/', name])
 
+# params are supplied by the user in the yml file
+# param_list is a list of needed parameters
+# description is text to return as part of the error message
+    def check_required_parameters(self, params, param_list, description=""):
+        for item in param_list:
+            assert item in params, "Missing \'{}\' parameter.  {}".format(item, description)
+        return
+
     def simple_get(self, url):
         response = requests.get(url, headers=self.headers, verify=self.verify)
         assert response.status_code == 200, "{} {} - {}".format(response.status_code, response.reason, self.get_error_details(response))
@@ -135,15 +143,20 @@ class HNASFileServer:
         url = self.base_uri + "filesystems/{}".format(filesystemId)
         return self.simple_get(url)
 
-    def get_share_or_export(self, virtualServerId, type, name=None):
+    def get_share_or_export(self, virtualServerId, type, name=None, include_share_authentications=False):
         name = self.check_share_export_name(type, name)
         url = self.base_uri + "virtual-servers/{}/{}".format(virtualServerId, type)
         if name != None:
             url = self.append_to_url(url, "name={}".format(name))
-        return self.simple_get(url)
+        share_list = self.simple_get(url)
+        if include_share_authentications == True:
+            for share in share_list['filesystemShares']:
+                saa_list = self.get_cifs_authentications(share['objectId'])
+                share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+        return share_list
 
-    def get_shares(self, virtualServerId, name=None):
-        return self.get_share_or_export(virtualServerId, "cifs", name=name)
+    def get_shares(self, virtualServerId, name=None, include_share_authentications=False):
+        return self.get_share_or_export(virtualServerId, "cifs", name=name, include_share_authentications=include_share_authentications)
 
     def get_exports(self, virtualServerId, name=None):
         return self.get_share_or_export(virtualServerId, "nfs", name=name)
@@ -173,15 +186,29 @@ class HNASFileServer:
         return dict(ports=ports)
 
 # return True if the share was deleted, False if it was not present
-    def delete_share_or_export(self, virtualServerId, type, name):
-        name = self.check_share_export_name(type, name)
+# return <changed> <share>
+#################################
+# need to modify to return share if the SAAs need to be deleted
+#    changed = self.delete_cifs_authentications(self, shareId, params)
+    def delete_share_or_export(self, virtualServerId, type, params):
+        self.check_required_parameters(params, ['name'])
+#        assert 'name' in params, "Missing 'name' data value"
+        name = self.check_share_export_name(type, params['name'])
         share_list = self.get_share_or_export(virtualServerId, type, name)
         if len(share_list['filesystemShares']) == 0:  # not there anyway, so can be considered absent
-            return False
+            return False, ""
         share = share_list['filesystemShares'][0]
-        url = self.base_uri + "filesystem-shares/{}/{}".format(type, share['objectId'])
-        self.simple_delete(url)
-        return True
+        if type == 'cifs' and 'cifsAuthentications' in params:
+        # delete cifs saa instead of the share
+            changed = self.delete_cifs_authentications(share['objectId'], params)
+            saa_list = self.get_cifs_authentications(share['objectId'])
+            share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+        else:
+            url = self.base_uri + "filesystem-shares/{}/{}".format(type, share['objectId'])
+            self.simple_delete(url)
+            changed = True
+            share = ""
+        return True, share
 
 # share/export specific parameters are in the params dictionary
 # returns three values <changed> <success> <share>
@@ -189,25 +216,74 @@ class HNASFileServer:
         self.check_share_export_type(type)
         data = {}
         data['virtualServerId'] = virtualServerId
-        assert 'name' in params, "Missing 'name' data value"
+        self.check_required_parameters(params, ['name', 'filesystemId'])
+#        assert 'name' in params, "Missing 'name' data value"
         data['name'] = self.check_share_export_name(type, params['name'])
-        assert 'filesystemId' in params, "Missing 'filesystemId' data value"
+#        assert 'filesystemId' in params, "Missing 'filesystemId' data value"
         data['filesystemId'] = params['filesystemId']
-        assert 'filesystemPath' in params, "Missing 'filesystemPath' data value"
-        data['filesystemPath'] = params['filesystemPath']
+        settings = {}
 # check to see if it already exists on the same virtual server
         share_list = self.get_share_or_export(virtualServerId, type, data['name'])
         if len(share_list['filesystemShares']) != 0:  # already there, so can be considered present
-# need to return a failure if the share exists but points somewhere else
             share = share_list['filesystemShares'][0]
-            if share['path'] == data['filesystemPath'] and share['filesystemId'] == data['filesystemId']:
-                return False, True, share
+# only parameters that stay constant are the name, virtualServerId and filesystemId - all others can be changed
+            if share['filesystemId'] == data['filesystemId']:
+                existing_settings = share['settings']
+                update_needed = False
+                data['filesystemPath'] = params.get('filesystemPath', share['path'])
+                settings['accessConfig'] = params.get('accessConfig', existing_settings['accessConfig'])
+                settings['snapshotOption'] = params.get('snapshotOption', existing_settings['snapshotOption'])
+                settings['transferToReplicationTargetSetting'] = params.get('transferToReplicationTargetSetting', existing_settings['transferToReplicationTargetSetting'])
+                if type == "nfs":
+                    settings['localReadCacheOption'] = params.get('localReadCacheOption', existing_settings['localReadCacheOption'])
+                elif type == 'cifs':
+                    settings['comment'] = params.get('comment', existing_settings['comment'])
+                    settings['userHomeDirectoryPath'] = params.get('userHomeDirectoryPath', existing_settings['userHomeDirectoryPath'])
+                    settings['isScanForVirusesEnabled'] = params.get('isScanForVirusesEnabled', existing_settings['isScanForVirusesEnabled'])
+                    settings['maxConcurrentUsers'] = params.get('maxConcurrentUsers', existing_settings['maxConcurrentUsers'])
+                    settings['cacheOption'] = params.get('cacheOption', existing_settings['cacheOption'])
+                    settings['userHomeDirectoryMode'] = params.get('userHomeDirectoryMode', existing_settings['userHomeDirectoryMode'])
+                    settings['isFollowSymbolicLinks'] = params.get('isFollowSymbolicLinks', existing_settings['isFollowSymbolicLinks'])
+                    settings['isFollowGlobalSymbolicLinks'] = params.get('isFollowGlobalSymbolicLinks', existing_settings['isFollowGlobalSymbolicLinks'])
+                    settings['isForceFileNameToLowercase'] = params.get('isForceFileNameToLowercase', existing_settings['isForceFileNameToLowercase'])
+                    settings['isABEEnabled'] = params.get('isABEEnabled', existing_settings['isABEEnabled'])
+# check for any changes to any settings
+                if (settings['accessConfig'] != existing_settings['accessConfig'] or settings['snapshotOption'] != existing_settings['snapshotOption'] or
+                    settings['transferToReplicationTargetSetting'] != existing_settings['transferToReplicationTargetSetting'] or
+                    data['filesystemPath'] != share['path']):
+                    update_needed = True
+                if (type == "cifs" and (settings['comment'] != existing_settings['comment'] or settings['userHomeDirectoryPath'] != existing_settings['userHomeDirectoryPath'] or
+                    settings['isScanForVirusesEnabled'] != existing_settings['isScanForVirusesEnabled'] or 
+                    settings['maxConcurrentUsers'] != existing_settings['maxConcurrentUsers'] or settings['cacheOption'] != existing_settings['cacheOption'] or
+                    settings['userHomeDirectoryMode'] != existing_settings['userHomeDirectoryMode'] or 
+                    settings['isFollowSymbolicLinks'] != existing_settings['isFollowSymbolicLinks'] or 
+                    settings['isFollowGlobalSymbolicLinks'] != existing_settings['isFollowGlobalSymbolicLinks'] or 
+                    settings['isForceFileNameToLowercase'] != existing_settings['isForceFileNameToLowercase'] or 
+                    settings['isABEEnabled'] != existing_settings['isABEEnabled'])):
+                    update_needed = True
+                if type == "nfs" and settings['localReadCacheOption'] != existing_settings['localReadCacheOption']:
+                    update_needed = True
+                if update_needed == True:
+                    data['settings'] = settings
+                    url = self.base_uri + "filesystem-shares/{}/{}".format(type, share['objectId'])
+                    self.simple_patch(url, 204, data=data)
+                    share_list = self.get_share_or_export(virtualServerId, type, data['name'])
+                    share = share_list['filesystemShares'][0]
+############################
+# should see if SAA list needs to be added to
+                if self.add_cifs_authentications(share['objectId'], params):
+                    update_needed = True
+                saa_list = self.get_cifs_authentications(share['objectId'])
+                share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+                return update_needed, True, share
             else:
-###################
-# should try to do an update if parameters don't match
-
+# need to return a failure if a share exists with the same name, virtualServerId, but is hosted on a different filesystem
+# REST API allows filesystem to be changed, but don't allow it here
                 return False, False, share
-        settings = {}
+# not present, so create it instead
+        self.check_required_parameters(params, ['filesystemPath'])
+#        assert 'filesystemPath' in params, "Missing 'filesystemPath' data value"
+        data['filesystemPath'] = params['filesystemPath']
         settings['accessConfig'] = params.get('accessConfig', "")
         settings['snapshotOption'] = params.get('snapshotOption', "SHOW_AND_ALLOW_ACCESS")
         settings['transferToReplicationTargetSetting'] = params.get('transferToReplicationTargetSetting', "USE_FS_DEFAULT")
@@ -227,8 +303,12 @@ class HNASFileServer:
         data['settings'] = settings
 
         url = self.base_uri + "filesystem-shares/{}".format(type)
-        share = self.simple_post(url, 201, data=data)
-        return True, True, share['filesystemShare']
+        share = self.simple_post(url, 201, data=data)['filesystemShare']
+# add SAA is specified
+        self.add_cifs_authentications(share['objectId'], params)
+        saa_list = self.get_cifs_authentications(share['objectId'])
+        share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+        return True, True, share
 
     def set_vitrual_server_state(self, virtualServerId=None, name=None, state=None):
         evs_list = self.get_virtual_servers(virtualServerId, name)
@@ -285,12 +365,13 @@ class HNASFileServer:
         evs_list = self.get_virtual_servers(virtualServerId, name)
         assert len(evs_list['virtualServers']) != 0, "virtual server not found"
         evs = evs_list['virtualServers'][0]
+        self.check_required_parameters(params, ['address', 'netmask', 'port'])
         data = {}
-        assert 'address' in params, "Missing 'address' data value"
+#        assert 'address' in params, "Missing 'address' data value"
         data['ipAddress'] = params['address']
-        assert 'netmask' in params, "Missing 'netmask' data value"
+#        assert 'netmask' in params, "Missing 'netmask' data value"
         data['mask'] = params['netmask']
-        assert 'port' in params, "Missing 'port' data value"
+#        assert 'port' in params, "Missing 'port' data value"
         data['port'] = params['port']
         url = self.base_uri + "virtual-servers/{}/ip-addresses".format(evs['virtualServerId'])
         self.simple_post(url, 204, data=data)
@@ -299,7 +380,8 @@ class HNASFileServer:
 # returns three values <changed> <success> <evs>
     def create_virtual_server(self, params):
         data = {}
-        assert 'name' in params, "Missing 'name' data value"
+        self.check_required_parameters(params, ['name'])
+#        assert 'name' in params, "Missing 'name' data value"
         data['name'] = params['name']
         data['clusterNodeId'] = int(params.get('clusterNodeId', 1))
         status = params.get('status', 'ONLINE')
@@ -402,7 +484,8 @@ class HNASFileServer:
 # returns three values <changed> <success> <filesystem>
     def create_filesystem(self, params):
         data = {}
-        assert 'label' in params, "Missing 'label' data value"
+        self.check_required_parameters(params, ['label', 'capacity'])
+#        assert 'label' in params, "Missing 'label' data value"
         data['label'] = params['label']
         if 'virtual_server_name' in params:
             # need to get virtualServerId if name supplied
@@ -420,7 +503,7 @@ class HNASFileServer:
         else:
             assert 'storagePoolId' in params, "Missing 'storagePoolId' data value"
             data['storagePoolId'] = params['storagePoolId']
-        assert 'capacity' in params, "Missing 'capacity' data value"
+#        assert 'capacity' in params, "Missing 'capacity' data value"
         data['capacity'] = self.get_unit_multiplier(params.get('capacity_unit', 'bytes')) * int(params['capacity'])
         status = params.get('status', 'MOUNTED')
         blockSize = params.get('blockSize', '4')
@@ -464,7 +547,8 @@ class HNASFileServer:
 # returns three values <changed> <success> <pool>
     def create_storage_pool(self, params):
         data = {'systemDrives':[]}
-        assert 'label' in params, "Missing 'label' data value"
+        self.check_required_parameters(params, ['label'])
+#        assert 'label' in params, "Missing 'label' data value"
         data['label'] = params['label']
         data['chunkSize'] = params.get('chunkSize', 19327352832) # appears to be the default chunk size value
         assert len(params['systemDrives']) >= 4, "Need a minimum of 4 system drives to create a storage pool"
@@ -489,6 +573,8 @@ class HNASFileServer:
 # need to check if access needs to be allowed to the system drives
 
 # should maybe add this check before checking for the pool, as allowing access might make the pool appear
+######################################
+# This needs to be improved or removed
         for systemDriveId in data['systemDrives']:
             url = self.base_uri + "system-drives?systemDriveId={}".format(systemDriveId)
             sd_list = self.simple_get(url)
@@ -504,12 +590,61 @@ class HNASFileServer:
         pool = self.simple_post(url, 201, data=data)['storagePool']
         return True, True, pool
 
+    def get_cifs_authentications(self, shareId):
+        url = self.base_uri + "filesystem-shares/cifs/{}/authentications".format(shareId)
+        return self.simple_get(url)
+
+# need to be able to check the names in a more intelligent way rather than just compare
+# return <present> <same permission> <encodedName>
+    def is_saa_present(self, saa_list, check_saa):
+        for saa in saa_list:
+            if check_saa['name'] == saa['name'] or saa['name'].lower().endswith(check_saa['name'].lower()):
+                if 'permission' in check_saa and check_saa['permission'] == saa['permission']:
+                    return True, True, saa['encodedName']
+                else:
+                    return True, False, saa['encodedName']
+        return False, False, ""
+        
+# return False if none were added
+# return True if some were added i.e. changed
+    def add_cifs_authentications(self, shareId, params):
+        changed = False
+        if 'cifsAuthentications' not in params:
+            return changed
+        saa_list = self.get_cifs_authentications(shareId)['cifsAuthentications']
+# need to walk around the list of existing ones and see if they are present already, as the correct permissions
+        new_saa_list = params['cifsAuthentications']
+        for saa in new_saa_list:
+            present, same, encodedName = self.is_saa_present(saa_list, saa)
+            if present == True and same == False:
+            # remove existing if the permissions do not match, as it's not possible to update them
+                url = self.base_uri + "filesystem-shares/cifs/{}/authentications/{}".format(shareId, encodedName)
+                self.simple_delete(url)
+                present = False
+            if present == False:
+                # not there so add it - easier to add them one at time
+                url = self.base_uri + "filesystem-shares/cifs/{}/authentications".format(shareId)
+                data = {'cifsAuthentications':[]}
+                data['cifsAuthentications'].append(saa)
+                self.simple_post(url, 201, data=data)
+                changed = True
+        return changed
+        
+    def delete_cifs_authentications(self, shareId, params):
+        saa_list = self.get_cifs_authentications(shareId)['cifsAuthentications']
+        delete_saa_list = params['cifsAuthentications']
+        changed = False
+        for saa in delete_saa_list:
+            present, _, encodedName = self.is_saa_present(saa_list, saa)
+            if present == True:
+                url = self.base_uri + "filesystem-shares/cifs/{}/authentications/{}".format(shareId, encodedName)
+                self.simple_delete(url)
+                changed = True
+        return changed
 
 #    def delete_snapshot:
 #    def create_snapshot:
 #    def expand_storage_pool:
-#    def add_cifs_authentications:
-#    def delete_cifs_authentications:
 #    def create_virtual_volume:
 #    def delete_virtual_volume:
 #    def create_virtual_volume_quota:
