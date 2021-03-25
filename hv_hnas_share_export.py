@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Put some comments here about what Hitachi Vantara's license is.
 ANSIBLE_METADATA = {
@@ -10,29 +11,23 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = '''
 ---
 module: hv_hnas_share_export
-short_description: This module creates/deletes shares and exports on Hitachi NAS servers
+short_description: This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers
 description:
-  - The C(hv_hnas_share_export) module creates/deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
+  - This module creates and deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
+  - It is also possible to update existing shares and exports by changing the supplied parameters.
+  - For CIFS/SMB shares, share access authentications can also be updated.
 version_added: "0.1"
-author:
-  - Hitachi Vantara, LTD.
-requirements:
+author: Hitachi Vantara, LTD.
 options:
   api_key:
-    description:
-    - The REST API authentication key - the preferred authentication method.
+    description: The REST API authentication key - the preferred authentication method.
     type: str
-    required: false
   api_username:
-    description:
-    - The username to authenticate with the REST API.
+    description: The username to authenticate with the REST API.
     type: str
-    required: false
   api_password:
-    description:
-    - The password to authenticate with the REST API.
+    description: The password to authenticate with the REST API.
     type: str
-    required: false
   api_url:
     description:
     - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
@@ -41,23 +36,22 @@ options:
     example:
     - https://10.1.2.3:8444/v7
   validate_certs:
-    description:
-    - Should https certificates be validated?
+    description: Should https certificates be validated?
     type: bool
-    required: false
     default: true
   state:
     description:
-    - set state to C(present) to ensure the existance of a share/export, and that it is in the requested state/configuration
-    - set state to C(absent) to ensure that specific share/export is not present on the server
+    - If I(state=present), ensure the existence of a share/export, and that it is in the requested state/configuration.
+    - If I(state=absent), ensure that specific share/export is not present on the server.
+    - should mention SAA
     type: str
     required: true
     choices: ['present', 'absent']
   data:
     description:
     - Additional data to describe the CIFS/SMB share or NFS export.
-    - The name, virtuslServerId and type parameters are required for all operations
-    - The other parameters are only required for 'present' operations
+    - The I(name), I(virtualServerId) and I(type) parameters are required for all operations
+    - The other parameters are only required for I(present) operations
     - Some parameters are applicable to NFS exports only
     - Some parameters are applicable to CIFS/SMB shares only
     - Some parameters are applicable to both NFS exports and CIFS/SMB shares.
@@ -69,98 +63,112 @@ options:
         type: str
         required: true
       virtualServerId:
-        description: virtualServerId parameter of the virtual server that hosts the share/export
+        description: C(virtualServerId) parameter of the virtual server that hosts the share/export
         type: int
         required: true
       filesystemId:
-        description: filesystemId of the filesystem associated with the share/export
+        description: C(filesystemId) of the filesystem associated with the share/export
         type: str
       filesystemPath:
         description: 
         - filesystem location that is exported by the share/export
-        - For NFS exports, the path should be in UNIX format - /folder/sub-folder
-        - For CIFS/SMB shares, the path should be in Windows format - \\folder\\sub-folder
+        - If I(type=nfs) the path should be in UNIX format - '/folder/sub-folder'
+        - If I(type=cifs) the path should be in Windows format - '\\\\folder\\\\sub-folder'
         type: str
       type:
-        description: Type of 'share', 'nfs' refers to an NFS export, and 'cifs' refers to a CIFS/SMB share
+        description: If I(type=nfs) refers to an NFS export, and I(type=cifs) refers to a CIFS/SMB share
         type: str
         choices: ["nfs", "cifs"]
         required: true
       accessConfig:
-        description: Set the client access restrictions for this share/export. By default all clients have read and write access.
+        description: Set the client access restrictions for this share/export.  By default all clients have read and write access.
         type: str
-        required: false
-      snapshotOption
+      snapshotOption:
         description: Sets the accessibility and visibility of the snapshot directory.
         type: str
         choices: ["HIDE_AND_DISABLE_ACCESS", "HIDE_AND_ALLOW_ACCESS", "SHOW_AND_ALLOW_ACCESS"]
         default: "SHOW_AND_ALLOW_ACCESS"
-        required: false
       transferToReplicationTargetSetting:
         description: Sets whether the share or export should be brought online when the replication target of this shares/exports file system is converted to read-write.
         type: str
         choices: ["DO_NOT_TRANSFER", "TRANSFER", "USE_FS_DEFAULT", "INVALID"]
         default: "USE_FS_DEFAULT"
-        required: false
       localReadCacheOption:
-        description: NFS export only - sets which files are candidates for read caching
+        description: Sets which files are candidates for read caching.  Valid if I(type=nfs).
         type: str
         choice: ["DISABLED", "ENABLED_FOR_ALL_FILES", "ENABLED_FOR_TAGGED_FILES", "ENABLED_FOR_CVLS"]
         default: "DISABLED"
-        required: false
       comment:
-        description: CIFS/SMB share only - comment associated with the share.
+        description: A comment associated with the share.  Valid if I(type=cifs).
         type: str
-        required: false
       userHomeDirectoryPath:
-        description: CIFS/SMB share only - per-user home directories will be created using this path, relative to the share root, 
+        description: Per-user home directories will be created using this path, relative to the share root.  Valid if I(type=cifs).
         type: str
-        required: false
       isScanForVirusesEnabled:
-        description: CIFS/SMB share only - if virus scanning is enabled, don't scan files accessed via this share for viruses.
-        required: false
+        description: If virus scanning is enabled, don't scan files accessed via this share for viruses.  Valid if I(type=cifs).
         type: bool
         default: false
       maxConcurrentUsers:
-        description: CIFS/SMB share only - set the maximum allowed connections.  -1 allows unlimited client connections.
+        description: Controls the maximum allowed connections.  -1 allows unlimited client connections.  Valid if I(type=cifs).
         type: int
         default: -1
-        required: false
       cacheOption:
-        description: CIFS/SMB share only - set the share's cache options.
+        description: Specifies the share's cache options.  Valid if I(type=cifs).
         type: str
         choice: ["MANUAL_CACHING_DOCS", "AUTO_CACHING_DOCS", "AUTO_CACHING_PROGS", "CACHING_OFF"]
         default: "MANUAL_CACHING_DOCS"
-        required: false
       userHomeDirectoryMode:
-        description: CIFS/SMB share only - set the share's home directory behaviour
+        description: Set the share's home directory behaviour.  Valid if I(type=cifs).
         type: str
         choice: ["OFF", "ADS", "USER", "HIDDEN_USER", "DOMAIN_AND_USER", "UNIX"]
         default: "OFF"
-        required: false
       isFollowSymbolicLinks:
         description: 
-        - CIFS/SMB share only - if symlinks are encountered when browsing this share,
-        - follow them automatically on the server. If client side symlink handling is enabled.
-        - This setting does not affect clients using the SMB2 or SMB3 protocols.
+        - If symlinks are encountered when browsing this share, follow them automatically on the server. 
+        - If client side symlink handling is enabled, this setting does not affect clients using the SMB2 or SMB3 protocols.
+        - Valid if I(type=cifs).
         type: bool
         default: false
-        required: false
       isFollowGlobalSymbolicLinks:
-        description: CIFS/SMB share only - allow clients that are connected to this share to follow global symlinks.
+        description: Allow clients that are connected to this share to follow global symlinks.  Valid if I(type=cifs).
         type: bool
         default: false
-        required: false
       isForceFileNameToLowercase:
-        description: CIFS/SMB share only - convert the names of all files and directories created to lower case.
+        description: Convert the names of all files and directories created to lower case.  Valid if I(type=cifs).
         type: bool
         default: false
-        required: false
       isABEEnabled:
-        description: CIFS/SMB share only - enable Access-based Enumeration, which makes visible only those files or folders that the user has rights to access.
+        description: Enable Access-based Enumeration, which makes visible only those files or folders that the user has rights to access.  Valid if I(type=cifs).
         type: bool
         default: false
-        required: false
+      cifsAuthentications:
+        description: A list of share access authentication entries that must be C(present) or C(absent) from the CIFS/SMB share.  Valid if I(type=cifs).
+        type: list
+        elements: dict
+        suboptions:
+          name:
+            description:
+            - The I(name) of the Windows user, group or SID to associate the access requirements with.
+            - When checking if a I(name) is C(present), the C(permission) and C(type) fields are also required.
+            - When removing items I(state=absent), only the C(name) parameter is needed.
+            type: str
+          permission:
+            description: 
+            - Bit representation of the permissions for access authentication.
+            - The following values should be used to grant the appropriate access.
+            - 0 is no permission
+            - 8 is grant read access
+            - 24 is grant read and change access
+            - 56 is grant read, change and full control
+            - 1 is deny read access
+            - 3 is deny read and change access
+            - 7 is deny read, change and full control
+            type: int
+          type:
+            description: The I(type) of the user/group/SID specified in the C(name) parameter.
+            type: str
+            choices: ['ALIAS', 'COMPUTER', 'DELETED', 'DOMAIN', 'GROUP', 'INVALID', 'UNKNOWN', 'USER', 'WELLKNOWN']
+
 
 '''
 

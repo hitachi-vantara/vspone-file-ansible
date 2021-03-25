@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Put some comments here about what Hitachi Vantara's license is.
 ANSIBLE_METADATA = {
@@ -10,29 +11,22 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = '''
 ---
 module: hv_hnas_facts
-short_description: This module gathers various facts about Hitachi NAS virtual servers
+short_description: This module gathers various facts about Hitachi NAS servers
 description:
-  - The hv_hnas_facts module gathers various facts about Hitachi NAS virtual servers.
+  - This module gathers various facts about Hitachi NAS server.
+  - It can gather storage details and also file serving details.
 version_added: "0.1"
-author:
-  - Hitachi Vantara, LTD.
-requirements:
+author: Hitachi Vantara, LTD.
 options:
   api_key:
-    description:
-    - The REST API authentication key - the preferred authentication method.
+    description: The REST API authentication key - the preferred authentication method.
     type: str
-    required: false
   api_username:
-    description:
-    - The username to authenticate with the REST API.
+    description: The username to authenticate with the REST API.
     type: str
-    required: false
   api_password:
-    description:
-    - The password to authenticate with the REST API.
+    description: The password to authenticate with the REST API.
     type: str
-    required: false
   api_url:
     description:
     - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
@@ -41,38 +35,58 @@ options:
     example:
     - https://10.1.2.3:8444/v7
   validate_certs:
-    description:
-    - Should https certificates be validated?
+    description: Should https certificates be validated?
     type: bool
-    required: false
     default: true
   fact_type:
     description:
-    - A list of required facts.  Valid list items are:
-    - system_facts         - gather details about the HNAS cluster, including node information
-    - virtual_server_facts - gather details about the virtual servers hosted on the cluster
-    - system_drive_facts   - gather details about the system drives visible to the cluster
-    - storage_pool_facts   - gather details about the storage pools hosted on the cluster
-    - filesystem_facts     - gather details about the filesystems hosted on the cluster
-    - nfs_export_facts     - gather details of NFS exports hosted on a particular virtual server
-    - cifs_share_facts     - gather details of SMB/CIFS shares hosts on a particular virtual server
-    - snapshot_facts       - gather a list of snapshots present on s particular filesystem
-    - network_port_facts   - gather a list of the physical network ports available to each cluster node
-    - aggregate_port_facts - gather a list of the aggregate network ports available to each cluster node
+    - A list of required facts.  Valid list items are
+    -  C(system_facts)         - gather details about the HNAS cluster, including node information
+    -  C(virtual_server_facts) - gather details about the virtual servers hosted on the cluster
+    -  C(system_drive_facts)   - gather details about the system drives visible to the cluster
+    -  C(storage_pool_facts)   - gather details about the storage pools hosted on the cluster
+    -  C(filesystem_facts)     - gather details about the filesystems hosted on the cluster
+    -  C(nfs_export_facts)     - gather details of NFS exports hosted on a particular virtual server
+    -  C(cifs_share_facts)     - gather details of SMB/CIFS shares hosts on a particular virtual server
+    -  C(snapshot_facts)       - gather a list of snapshots present on s particular filesystem
+    -  C(network_port_facts)   - gather a list of the physical network ports available to each cluster node
+    -  C(aggregate_port_facts) - gather a list of the aggregate network ports available to each cluster node
+    choices:
+      system_facts:
+        description: gather details about the HNAS cluster, including node information
+      virtual_server_facts:
+        description: gather details about the virtual servers hosted on the cluster
+      system_drive_facts:
+        description: gather details about the system drives visible to the cluster
+      storage_pool_facts:
+        description: gather details about the storage pools hosted on the cluster
+      filesystem_facts:
+        description: gather details about the filesystems hosted on the cluster
+      nfs_export_facts:
+        description: gather details of NFS exports hosted on a particular virtual server
+      cifs_share_facts:
+        description: gather details of SMB/CIFS shares hosts on a particular virtual server
+      snapshot_facts:
+        description: gather a list of snapshots present on s particular filesystem
+      network_port_facts:
+        description: gather a list of the physical network ports available to each cluster node
+      aggregate_port_facts:
+        description: gather a list of the aggregate network ports available to each cluster node
     type: list
+    elements: str
     required: true
   data:
     description:
     - Provides additional data when facts to be gathered are associated with a specific resource
-    required: false
     type: dict
     suboptions:
       filesystemId:
-        description: filesystemId of a filesystem - required when retrieving snapshot_facts, otherwise not required
+        description: C(filesystemId) parameter specifying a filesystem - required when retrieving I(snapshot_facts), otherwise not required
         type: str
       virtualServerId:
-        description: virtualServerId parameter of a virtual server - required when retrieving nfs_export_facts or smb_share_facts, otherwise not required
+        description: C(virtualServerId) parameter specifying a virtual server - required when retrieving I(nfs_export_facts) or I(smb_share_facts), otherwise not required
         type: int
+
 '''
 
 EXAMPLES = '''

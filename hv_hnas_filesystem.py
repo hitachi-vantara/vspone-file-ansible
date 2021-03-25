@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Put some comments here about what Hitachi Vantara's license is.
 ANSIBLE_METADATA = {
@@ -12,27 +13,21 @@ DOCUMENTATION = '''
 module: hv_hnas_filesystem
 short_description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
 description:
-  - The C(hv_hnas_filesystem) module creates/deletes/expands/mount/unmount Hitachi NAS filesystems.
+  - This module can be use to create or delete filesystems on Hitachi NAS servers.
+  - It can also be used to expand an existing filesystem, by increasing the capacity.
+  - The state of filesystem can be set to mounted or unmounted by setting the I(status) appropriately.
 version_added: "0.1"
-author:
-  - Hitachi Vantara, LTD.
-requirements:
+author: Hitachi Vantara, LTD.
 options:
   api_key:
-    description:
-    - The REST API authentication key - the preferred authentication method.
+    description: The REST API authentication key - the preferred authentication method.
     type: str
-    required: false
   api_username:
-    description:
-    - The username to authenticate with the REST API.
+    description: The username to authenticate with the REST API.
     type: str
-    required: false
   api_password:
-    description:
-    - The password to authenticate with the REST API.
+    description: The password to authenticate with the REST API.
     type: str
-    required: false
   api_url:
     description:
     - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
@@ -41,25 +36,23 @@ options:
     example:
     - https://10.1.2.3:8444/v7
   validate_certs:
-    description:
-    - Should https certificates be validated?
+    description: Should https certificates be validated?
     type: bool
-    required: false
     default: true
   state:
     description:
-    - set state to C(present) to ensure the existance of a filesystem, and that it is at least the requested size
-    - set state to C(absent) to ensure that specific filesystem is not present on the server
+    - If I(state=present), ensure the existence of a filesystem, with the requested I(status), and that it is at least the requested I(capacity).
+    - If I(state=absent), ensure that specific filesystem is not present on the server.
     type: str
     required: true
     choices: ['present', 'absent']
   data:
     description:
     - Additional data to describe the filesystem.
-    - The label parameter is required for all operations, and is the only paramaeter required for the delete operation.
-    - Either the storage_pool_name or storagePoolId parameter needs to be specified for all 'present' operations.
-    - Either the virtual_server_name or virtualServerId parameter needs to be specified for all 'present' operations.
-    - The capacity value is required for all 'present' operations.
+    - The I(label) parameter is required for all operations, and is the only parameter required for the delete operation.
+    - Either the I(storage_pool_name) or I(storagePoolId) parameter needs to be specified for all C(present) operations.
+    - Either the I(virtual_server_name) or I(virtualServerId) parameter needs to be specified for all C(present) operations.
+    - The I(capacity) value is required for all C(present) operations.
     required: true
     type: dict
     suboptions:
@@ -80,15 +73,15 @@ options:
         description: ID of the virtual server that should host the filesystem
         type: int
       capacity_unit:
-        description: unit to use as a multiplier for the capacity value
+        description: unit to use as a multiplier for the I(capacity) value
         choices: ['b', 'bytes', 'k', 'kb', 'kib', 'm', 'mb', 'mib', 'g', 'gb', 'gib', 't', 'tb', 'tib']
         type: str
         default: bytes
       capacity:
         description:
         - Minimum capacity of the filesystem.
-        - The capacity value will be dependant on the chunkSize of the storage pool.
-        - The capacity value should be used in conjunction with the capacity_unit value.
+        - The I(capacity) value will be dependant on the chunkSize of the storage pool.  See M(hv_hnas_storage_pool).
+        - The I(capacity) value should be used in conjunction with the I(capacity_unit) value.
         type: int
       status:
         description: required status of the filesystem

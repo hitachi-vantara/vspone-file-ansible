@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Put some comments here about what Hitachi Vantara's license is.
 ANSIBLE_METADATA = {
@@ -10,29 +11,22 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = '''
 ---
 module: hv_hnas_storage_pool
-short_description: This module creates/deletes Hitachi NAS storage pools
+short_description: This module manages Hitachi NAS storage pools
 description:
-  - The C(hv_hnas_storage_pool) module creates/deletes Hitachi NAS storage pools.
+  - This module allows the creation and deletion of Hitachi NAS storage pools.
+  - The presence of a storage pool allows filesystems to be created.
 version_added: "0.1"
-author:
-  - Hitachi Vantara, LTD.
-requirements:
+author: Hitachi Vantara, LTD.
 options:
   api_key:
-    description:
-    - The REST API authentication key - the preferred authentication method.
+    description: The REST API authentication key - the preferred authentication method.
     type: str
-    required: false
   api_username:
-    description:
-    - The username to authenticate with the REST API.
+    description: The username to authenticate with the REST API.
     type: str
-    required: false
   api_password:
-    description:
-    - The password to authenticate with the REST API.
+    description: The password to authenticate with the REST API.
     type: str
-    required: false
   api_url:
     description:
     - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
@@ -41,22 +35,20 @@ options:
     example:
     - https://10.1.2.3:8444/v7
   validate_certs:
-    description:
-    - Should https certificates be validated?
+    description: Should https certificates be validated?
     type: bool
-    required: false
     default: true
   state:
     description:
-    - set state to C(present) to ensure the existance of a storage pool
-    - set state to C(absent) to ensure that specific storage pool is not present on the server
+    - If I(state=present), ensure the existence of a storage pool.
+    - If I(state=absent), ensure that specific storage pool is not present on the server.
     type: str
     required: true
     choices: ['present', 'absent']
   data:
     description:
     - Additional data to describe the storage pool.
-    - The label parameter is required for both create and delete operations.
+    - The I(label) parameter is required for both create and delete operations.
     - The other parameters are only required for the create operation.
     required: true
     type: dict

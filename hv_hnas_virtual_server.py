@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Put some comments here about what Hitachi Vantara's license is.
 ANSIBLE_METADATA = {
@@ -12,27 +13,20 @@ DOCUMENTATION = '''
 module: hv_hnas_virtual_server
 short_description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
 description:
-  - The C(hv_hnas_virtual_server) module creates/deletes Hitachi NAS virtual servers.
+  - This module can be used to ensure that a virtual server does or does not exist on a Hitachi NAS server.
+  - IP addresses can also be added or removed from virtual servers.
 version_added: "0.1"
-author:
-  - Hitachi Vantara, LTD.
-requirements:
+author: Hitachi Vantara, LTD.
 options:
   api_key:
-    description:
-    - The REST API authentication key - the preferred authentication method.
+    description: The REST API authentication key - the preferred authentication method.
     type: str
-    required: false
   api_username:
-    description:
-    - The username to authenticate with the REST API.
+    description: The username to authenticate with the REST API.
     type: str
-    required: false
   api_password:
-    description:
-    - The password to authenticate with the REST API.
+    description: The password to authenticate with the REST API.
     type: str
-    required: false
   api_url:
     description:
     - The URL to access the Hitachi NAS REST API.  This needs to include the protocol, address, port and API version.
@@ -41,23 +35,21 @@ options:
     example:
     - https://10.1.2.3:8444/v7
   validate_certs:
-    description:
-    - Should https certificates be validated?
+    description: Should https certificates be validated?
     type: bool
-    required: false
     default: true
   state:
     description:
-    - set state to C(present) to ensure the existance of a virtual server, or ensure that IP addresses are assigned to a virtual server
-    - set state to C(absent) to ensure that specific IP addresses are not assigned to a virtual server, or to delete a virtual server
+    - If I(state=present), ensure the existence of a virtual server, or ensure that IP addresses are assigned to a virtual server.
+    - If I(state=absent), ensure that specific IP addresses are not assigned to a virtual server, or that a virtual server is not present.
     type: str
     required: true
     choices: ['present', 'absent']
   data:
     description:
     - Additional data to describe the virtual server.
-    - The name parameter is required for both create and delete operations.
-    - The address_details parameter can be used to add and remove multiple addresses from virtual servers
+    - The I(name) parameter is required for both create and delete operations.
+    - The I(address_details) parameter can be used to add and remove multiple addresses from virtual servers
     - The other parameters are only required for the create operation.
     required: true
     type: dict
@@ -73,9 +65,9 @@ options:
       address_details:
         description:
         - A list of IP addresses that should be present/absent from a virtual server.
-        - If state: present, netmask and port need to be supplied for each address
-        - If state: absent, just the address parameter is needed
-        - If the address_details parameter is not present and state=absent, then the virtual server is deleted
+        - If I(state=present), I(netmask) and I(port) need to be supplied for each address
+        - If I(state=absent), just the I(address) parameter is needed
+        - If the I(address_details) parameter is not present and I(state=absent), then the virtual server is deleted
         type: dict
         suboptions:
           address:
