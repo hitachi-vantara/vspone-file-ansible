@@ -143,20 +143,20 @@ class HNASFileServer:
         url = self.base_uri + "filesystems/{}".format(filesystemId)
         return self.simple_get(url)
 
-    def get_share_or_export(self, virtualServerId, type, name=None, include_share_authentications=False):
+    def get_share_or_export(self, virtualServerId, type, name=None):
         name = self.check_share_export_name(type, name)
         url = self.base_uri + "virtual-servers/{}/{}".format(virtualServerId, type)
         if name != None:
             url = self.append_to_url(url, "name={}".format(name))
         share_list = self.simple_get(url)
-        if include_share_authentications == True:
+        if type == "cifs":
             for share in share_list['filesystemShares']:
                 saa_list = self.get_cifs_authentications(share['objectId'])
                 share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
         return share_list
 
-    def get_shares(self, virtualServerId, name=None, include_share_authentications=False):
-        return self.get_share_or_export(virtualServerId, "cifs", name=name, include_share_authentications=include_share_authentications)
+    def get_shares(self, virtualServerId, name=None):
+        return self.get_share_or_export(virtualServerId, "cifs", name=name)
 
     def get_exports(self, virtualServerId, name=None):
         return self.get_share_or_export(virtualServerId, "nfs", name=name)
