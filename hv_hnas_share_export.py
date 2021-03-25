@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_share_export
+module: hv_hnas_share_export
 short_description: This module creates/deletes shares and exports on Hitachi NAS servers
 description:
-  - The C(hnas_share_export) module creates/deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
+  - The C(hv_hnas_share_export) module creates/deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
 version_added: "0.1"
 author:
   - Hitachi Vantara, LTD.
@@ -174,7 +174,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_share_export:
+  - hv_hnas_share_export:
       state: present
       <<: *login
       data:
@@ -196,7 +196,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hnas_share_export:
+    - hv_hnas_share_export:
         state: absent
         <<: *login
         data:
@@ -214,7 +214,7 @@ RETURN = '''
 
 PLAY [Create HNAS CIFS share] ***********************************************************************************************************************************
 
-TASK [hnas_share_export] ****************************************************************************************************************************************
+TASK [hv_hnas_share_export] *************************************************************************************************************************************
 changed: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -253,7 +253,7 @@ localhost                  : ok=2    changed=1    unreachable=0    failed=0    s
 
 PLAY [Delete HNAS CIFS share] ***********************************************************************************************************************************
 
-TASK [hnas_share_export] ****************************************************************************************************************************************
+TASK [hv_hnas_share_export] *************************************************************************************************************************************
 changed: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************

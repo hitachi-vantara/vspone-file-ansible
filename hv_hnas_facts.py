@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_facts
+module: hv_hnas_facts
 short_description: This module gathers various facts about Hitachi NAS virtual servers
 description:
-  - The hnas_facts module gathers various facts about Hitachi NAS virtual servers.
+  - The hv_hnas_facts module gathers various facts about Hitachi NAS virtual servers.
 version_added: "0.1"
 author:
   - Hitachi Vantara, LTD.
@@ -88,7 +88,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_facts: 
+  - hv_hnas_facts: 
       <<: *login
       fact_type:
         - aggregate_port_facts
@@ -104,7 +104,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_facts: 
+  - hv_hnas_facts: 
       <<: *login
       fact_type:
         - system_facts
@@ -120,7 +120,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_facts: 
+  - hv_hnas_facts: 
       <<: *login
       fact_type:
         - nfs_export_facts
@@ -135,12 +135,12 @@ RETURN = '''
 [root@localhost ~]# ansible-playbook hv_get_aggregate_facts.yml
 [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
-PLAY [localhost] ************************************************************************************************************************************************
+PLAY [Get Hitachi NAS network aggregate ports] ******************************************************************************************************************
 
 TASK [Gathering Facts] ******************************************************************************************************************************************
 ok: [localhost]
 
-TASK [Get Hitachi NAS network aggregate ports] ******************************************************************************************************************
+TASK [hv_hnas_facts] ********************************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -166,7 +166,7 @@ PLAY [Get Hitachi NAS system information] **************************************
 TASK [Gathering Facts] ******************************************************************************************************************************************
 ok: [localhost]
 
-TASK [hnas_facts] ***********************************************************************************************************************************************
+TASK [hv_hnas_facts] ********************************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -218,7 +218,7 @@ PLAY [Get NFS Export details for virtual server 1] *****************************
 TASK [Gathering Facts] ******************************************************************************************************************************************
 ok: [localhost]
 
-TASK [hnas_facts] ***********************************************************************************************************************************************
+TASK [hv_hnas_facts] ********************************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************

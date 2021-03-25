@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_filesystem
+module: hv_hnas_filesystem
 short_description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
 description:
-  - The C(hnas_filesystem) module creates/deletes/expands/mount/unmount Hitachi NAS filesystems.
+  - The C(hv_hnas_filesystem) module creates/deletes/expands/mount/unmount Hitachi NAS filesystems.
 version_added: "0.1"
 author:
   - Hitachi Vantara, LTD.
@@ -115,7 +115,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_filesystem:
+  - hv_hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -137,7 +137,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hnas_filesystem:
+    - hv_hnas_filesystem:
         state: absent
         <<: *login
         data:
@@ -155,7 +155,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_filesystem:
+  - hv_hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -176,7 +176,7 @@ RETURN = '''
 
 PLAY [Create or expand an HNAS filesystem] **********************************************************************************************************************
 
-TASK [hnas_filesystem] ******************************************************************************************************************************************
+TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
 changed: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -223,7 +223,7 @@ localhost                  : ok=2    changed=1    unreachable=0    failed=0    s
 
 PLAY [Delete HNAS filesystem] ***********************************************************************************************************************************
 
-TASK [hnas_filesystem] ******************************************************************************************************************************************
+TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
 changed: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -240,7 +240,7 @@ localhost                  : ok=2    changed=1    unreachable=0    failed=0    s
 
 PLAY [Unmount an HNAS filesystem] *******************************************************************************************************************************
 
-TASK [hnas_filesystem] ******************************************************************************************************************************************
+TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
 changed: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************

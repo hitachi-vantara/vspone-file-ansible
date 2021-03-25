@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_storage_pool
+module: hv_hnas_storage_pool
 short_description: This module creates/deletes Hitachi NAS storage pools
 description:
-  - The C(hnas_storage_pool) module creates/deletes Hitachi NAS storage pools.
+  - The C(hv_hnas_storage_pool) module creates/deletes Hitachi NAS storage pools.
 version_added: "0.1"
 author:
   - Hitachi Vantara, LTD.
@@ -95,7 +95,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hnas_storage_pool:
+  - hv_hnas_storage_pool:
       state: present
       <<: *login
       data:
@@ -114,7 +114,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hnas_storage_pool:
+    - hv_hnas_storage_pool:
         state: absent
         <<: *login
         data:
@@ -130,7 +130,7 @@ RETURN = '''
 
 PLAY [Create HNAS storage pool] *********************************************************************************************************************************
 
-TASK [hnas_storage_pool] ****************************************************************************************************************************************
+TASK [hv_hnas_storage_pool] *************************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -159,7 +159,7 @@ localhost                  : ok=2    changed=0    unreachable=0    failed=0    s
 
 PLAY [Delete HNAS storage pool] *********************************************************************************************************************************
 
-TASK [hnas_storage_pool] ****************************************************************************************************************************************
+TASK [hv_hnas_storage_pool] *************************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************

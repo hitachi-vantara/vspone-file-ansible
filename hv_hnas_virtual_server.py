@@ -9,10 +9,10 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: hnas_virtual_server
+module: hv_hnas_virtual_server
 short_description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
 description:
-  - The C(hnas_virtual_server) module creates/deletes Hitachi NAS virtual servers.
+  - The C(hv_hnas_virtual_server) module creates/deletes Hitachi NAS virtual servers.
 version_added: "0.1"
 author:
   - Hitachi Vantara, LTD.
@@ -100,7 +100,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hnas_virtual_server:
+  - hv_hnas_virtual_server:
       <<: *login
       state: present
       data:
@@ -124,7 +124,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hnas_virtual_server:
+  - hv_hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -141,7 +141,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hnas_virtual_server:
+  - hv_hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -158,9 +158,9 @@ RETURN = '''
 [root@localhost ~]# ansible-playbook hv_create_evs.yml
 [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
-PLAY [Create Hitachi NAS virtual server] ***************************************************************************************************************************
+PLAY [Create Hitachi NAS virtual server] ************************************************************************************************************************
 
-TASK [hnas_virtual_server] **************************************************************************************************************************************
+TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -187,9 +187,9 @@ localhost                  : ok=2    changed=0    unreachable=0    failed=0    s
 [root@localhost ~]# ansible-playbook hv_delete_evs.yml
 [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
-PLAY [Delete Hitachi NAS virtual server] ***************************************************************************************************************************
+PLAY [Delete Hitachi NAS virtual server] ************************************************************************************************************************
 
-TASK [hnas_virtual_server] **************************************************************************************************************************************
+TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
@@ -204,9 +204,9 @@ localhost                  : ok=2    changed=0    unreachable=0    failed=0    s
 [root@localhost ~]# ansible-playbook hv_delete_evs_address.yml
 [WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
-PLAY [Delete HNAS virtual server IP address] ***********************************************************************************************************************
+PLAY [Delete HNAS virtual server IP address] ********************************************************************************************************************
 
-TASK [hnas_virtual_server] **************************************************************************************************************************************
+TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
 ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
