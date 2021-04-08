@@ -279,7 +279,7 @@ import json
 from ansible.module_utils.api import basic_auth_argument_spec
 from ansible.module_utils.basic import AnsibleModule, get_exception
 
-import ansible.module_utils.hv_hnas_main as server
+import ansible.module_utils.storage.hv.hv_hnas_main as server
 
 
 def main():
