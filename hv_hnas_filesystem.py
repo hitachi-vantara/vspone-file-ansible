@@ -13,7 +13,7 @@ DOCUMENTATION = '''
 module: hv_hnas_filesystem
 short_description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
 description:
-  - This module can be use to create or delete filesystems on Hitachi NAS servers.
+  - This module can be used to create or delete filesystems on Hitachi NAS servers.
   - It can also be used to expand an existing filesystem, by increasing the capacity.
   - The state of filesystem can be set to mounted or unmounted by setting the I(status) appropriately.
 version_added: "0.1"
@@ -80,7 +80,7 @@ options:
       capacity:
         description:
         - Minimum capacity of the filesystem.
-        - The I(capacity) value will be dependant on the chunkSize of the storage pool.  See M(hv_hnas_storage_pool).
+        - The I(capacity) value will be dependent on the chunkSize of the storage pool.  See M(hv_hnas_storage_pool).
         - The I(capacity) value should be used in conjunction with the I(capacity_unit) value.
         type: int
       status:

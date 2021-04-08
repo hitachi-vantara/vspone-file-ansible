@@ -74,10 +74,10 @@ options:
             description: IP address to associated with/removed from the virtual server
             type: str
           netmask:
-            description: Network mask associated with the ipAddress parameter
+            description: Network mask associated with the address parameter
             type: str
           port:
-            description: Aggregate network port for ipAddress association
+            description: Aggregate network port for address association
             type: str
 
 '''
@@ -157,7 +157,7 @@ ok: [localhost]
 
 TASK [debug] ****************************************************************************************************************************************************
 ok: [localhost] => {
-    "resultCreate.virtualServer": {
+    "result.virtualServer": {
         "UUID": "0cf05696-1b0e-11d7-965f-9c5547075e75",
         "ipAddresses": [
             "172.27.5.15"

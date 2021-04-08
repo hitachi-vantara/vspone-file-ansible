@@ -271,10 +271,11 @@ class HNASFileServer:
                     share = share_list['filesystemShares'][0]
 ############################
 # should see if SAA list needs to be added to
-                if self.add_cifs_authentications(share['objectId'], params):
-                    update_needed = True
-                saa_list = self.get_cifs_authentications(share['objectId'])
-                share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+                if type == 'cifs':
+                    if self.add_cifs_authentications(share['objectId'], params):
+                        update_needed = True
+                    saa_list = self.get_cifs_authentications(share['objectId'])
+                    share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
                 return update_needed, True, share
             else:
 # need to return a failure if a share exists with the same name, virtualServerId, but is hosted on a different filesystem
@@ -304,10 +305,11 @@ class HNASFileServer:
 
         url = self.base_uri + "filesystem-shares/{}".format(type)
         share = self.simple_post(url, 201, data=data)['filesystemShare']
+        if type == "cifs":
 # add SAA is specified
-        self.add_cifs_authentications(share['objectId'], params)
-        saa_list = self.get_cifs_authentications(share['objectId'])
-        share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
+            self.add_cifs_authentications(share['objectId'], params)
+            saa_list = self.get_cifs_authentications(share['objectId'])
+            share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
         return True, True, share
 
     def set_vitrual_server_state(self, virtualServerId=None, name=None, state=None):

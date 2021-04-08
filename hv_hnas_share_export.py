@@ -105,7 +105,7 @@ options:
         description: Per-user home directories will be created using this path, relative to the share root.  Valid if I(type=cifs).
         type: str
       isScanForVirusesEnabled:
-        description: If virus scanning is enabled, don't scan files accessed via this share for viruses.  Valid if I(type=cifs).
+        description: If virus scanning is enabled, scan files accessed via this share for viruses.  Valid if I(type=cifs).
         type: bool
         default: false
       maxConcurrentUsers:
@@ -118,7 +118,7 @@ options:
         choice: ["MANUAL_CACHING_DOCS", "AUTO_CACHING_DOCS", "AUTO_CACHING_PROGS", "CACHING_OFF"]
         default: "MANUAL_CACHING_DOCS"
       userHomeDirectoryMode:
-        description: Set the share's home directory behaviour.  Valid if I(type=cifs).
+        description: Set the share's home directory behavior.  Valid if I(type=cifs).
         type: str
         choice: ["OFF", "ADS", "USER", "HIDDEN_USER", "DOMAIN_AND_USER", "UNIX"]
         default: "OFF"
