@@ -1,0 +1,58 @@
+- hosts: localhost
+  name: Get network aggregate ports, and use the information to create a new virtual server, storage pool, filesystem and NFS export
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - name: Get network ports
+    hv_hnas_facts: 
+      fact_type:
+      - aggregate_port_facts
+      <<: *login
+    register: resultPort
+  - name: Create virtual server
+    hv_hnas_virtual_server:
+      state: present
+      <<: *login
+      data:
+        name: "ansible-evs"
+        clusterNodeId: 1
+        address_details:
+        - address: "172.27.5.15"
+          netmask: "255.255.192.0"
+          port: "{{ resultPort.ansible_facts.aggregatePorts[0] }}"
+    register: resultEvs
+  - name: Create storage pool
+    hv_hnas_storage_pool:
+      state: present
+      <<: *login
+      data:
+        label: "ansible-pool"
+        systemDrives: [ "17", "18", "19", "16" ]
+        allow_denied_system_drives: yes
+    register: resultPool
+  - name: Create filesystem
+    hv_hnas_filesystem:
+      state: present
+      <<: *login
+      data:
+        label: "ansible-fs"
+        virtualServerId: "{{ resultEvs.virtualServer.virtualServerId }}"
+        storage_pool_name: "{{ resultPool.storagePool.label }}"
+        capacity: "123456"
+        status: "MOUNTED"
+    register: resultFs
+  - name: Create NFS export
+    hv_hnas_share_export:
+      state: present
+      <<: *login
+      data:
+        name: "ansible-export"
+        virtualServerId: "{{ resultEvs.virtualServer.virtualServerId }}"
+        filesystemId: "{{ resultFs.filesystem.filesystemId }}"
+        filesystemPath: "/"
+        type: "nfs"
+    register: resultExport

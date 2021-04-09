@@ -1,0 +1,31 @@
+- hosts: localhost
+  name: Create an HNAS CIFS share, picking the first filesytem associated with virtual server 2, and exporting the path \non-root\ansible
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+    share_name: ansible-cifs-share
+    virtualServerId: 2
+    filesystemPath: \non-root\ansible
+  tasks:
+  - name: Get filesystem details
+    hv_hnas_facts: 
+      fact_type:
+      - filesystem_facts
+      <<: *login
+      data:
+        virtualServerId: "{{ virtualServerId }}"
+    register: result
+  - hv_hnas_share_export:
+      state: present
+      <<: *login
+      data:
+        name: "{{ share_name }}"
+        virtualServerId: "{{ virtualServerId }}"
+        filesystemId: "{{ result['ansible_facts']['filesystems'][0]['filesystemId'] }}"
+        filesystemPath: "{{ filesystemPath }}"
+        type: "cifs"
+    register: result
+  - debug: var=result.cifsShare

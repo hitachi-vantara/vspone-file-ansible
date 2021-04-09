@@ -1,0 +1,20 @@
+- hosts: localhost
+  name: Delete HNAS NFS Export from virtual server 2
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+    share_name: ansible-test-nfs-export
+    virtualServerId: "2"
+  tasks:
+    - hv_hnas_share_export:
+        state: absent
+        <<: *login
+        data:
+          name: "{{ share_name }}"
+          virtualServerId: "{{ virtualServerId }}"
+          type: "nfs"
+      register: result
+    - debug: var=result

@@ -1,0 +1,26 @@
+- hosts: localhost
+  name: Ensure HNAS virtual server is present, with multiple IP addresses
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hv_hnas_virtual_server:
+      state: present
+      <<: *login
+      data:
+        name: "ansible"
+        address_details:
+        - address: "172.27.5.15"
+          netmask: "255.255.192.0"
+          port: "ag1"
+        - address: "172.27.5.16"
+          netmask: "255.255.192.0"
+          port: "ag1"
+        - address: "172.27.5.17"
+          netmask: "255.255.192.0"
+          port: "ag1"
+    register: resultCreate
+  - debug: var=resultCreate.virtualServer

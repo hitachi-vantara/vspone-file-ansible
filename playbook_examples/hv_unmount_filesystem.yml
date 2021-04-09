@@ -1,0 +1,21 @@
+- hosts: localhost
+  name: Ensure the specific HNAS filesystem is present, and that it is in the "NOT_MOUNTED" state
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hv_hnas_filesystem:
+      state: present
+      <<: *login
+      data:
+        label: "ansible"
+        virtualServerId: 1
+        storage_pool_name: "ansible-pool"
+        capacity_unit: gib
+        capacity: 20
+        status: "NOT_MOUNTED"
+    register: result
+  - debug: var=result.filesystem

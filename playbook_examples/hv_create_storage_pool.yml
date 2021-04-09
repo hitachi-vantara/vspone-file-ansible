@@ -1,0 +1,17 @@
+- hosts: localhost
+  name: Create HNAS storage pool.  The list of systemDrives needs to include at least 4 unused system drives
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hv_hnas_storage_pool:
+      state: present
+      <<: *login
+      data:
+        label: "ansible-pool"
+        systemDrives: [ 16, 17, 18, 19 ]
+    register: result
+  - debug: var=result.storagePool

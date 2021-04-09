@@ -1,0 +1,23 @@
+- hosts: localhost
+  name: Ensure that the specified share access authentications are not present on the HNAS CIFS share - the share is not deleted
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+    - hv_hnas_share_export:
+        state: absent
+        <<: *login
+        data:
+          name: "ansible-cifs-share"
+          virtualServerId: 2
+          type: "cifs"
+          cifsAuthentications:
+          - name: "current owner"
+          - name: "Administrators"
+          - name: "bob"
+
+      register: result
+    - debug: var=result.cifsShare

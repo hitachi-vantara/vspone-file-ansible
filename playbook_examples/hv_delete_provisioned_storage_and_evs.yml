@@ -1,0 +1,52 @@
+- hosts: localhost
+  name: Delete items provisioned in hv_provision_storage_and_evs.yml in the correct order
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - name: Get evs details
+    hv_hnas_facts: 
+      <<: *login
+      fact_type:
+        - virtual_server_facts
+      data:
+        name: "ansible-evs"
+    register: hnas
+
+  - name: Delete NFS export (need to lookup virtual server first to get the correct ID)
+    hv_hnas_share_export:
+      state: absent
+      <<: *login
+      data:
+        name: "ansible-export"
+        virtualServerId: "{{ item.virtualServerId }}"
+        type: "nfs"
+    register: resultExport
+    with_items: "{{ hnas.ansible_facts.virtualServers }}"
+
+  - name: Delete filesystem
+    hv_hnas_filesystem:
+      state: absent
+      <<: *login
+      data:
+        label: "ansible-fs"
+    register: resultFs
+
+  - name: Delete virtual server
+    hv_hnas_virtual_server:
+      state: absent
+      <<: *login
+      data:
+        name: "ansible-evs"
+    register: resultEvs
+
+  - name: Delete storage pool
+    hv_hnas_storage_pool:
+      state: absent
+      <<: *login
+      data:
+        label: "ansible-pool"
+    register: resultPool

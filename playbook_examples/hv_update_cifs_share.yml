@@ -1,0 +1,28 @@
+- hosts: localhost
+  name: Create or update an HNAS CIFS share, ensuring that the specified share authentications are present, and set a few of the parameters
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hv_hnas_share_export:
+      state: present
+      <<: *login
+      data:
+        name: "ansible-cifs-share"
+        virtualServerId: 2
+        filesystemId: "075E7582C745AEA10000000000000000"
+        type: "cifs"
+        snapshotOption: "HIDE_AND_ALLOW_ACCESS"
+        filesystemPath: "\\frank"
+        cifsAuthentications:
+        - name: "current owner"
+          permission: 56
+          type: "USER"
+        - name: "Administrators"
+          permission: 24
+          type: "GROUP"
+    register: result
+  - debug: var=result

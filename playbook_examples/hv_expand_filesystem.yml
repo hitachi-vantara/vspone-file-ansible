@@ -1,0 +1,19 @@
+- hosts: localhost
+  name: Expand/ensure an existing HNAS filesystem is at least 40G - the omission of storage pool details means this would fail if the filesystem does not already exist 
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hv_hnas_filesystem:
+      state: present
+      <<: *login
+      data:
+        label: "ansible"
+        virtualServerId: 1
+        capacity_unit: gib
+        capacity: 40
+    register: result
+  - debug: var=result.filesystem

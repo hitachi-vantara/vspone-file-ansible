@@ -1,0 +1,31 @@
+- hosts: localhost
+  name: Creates an HNAS NFS Export, picking the first filesystem associated with virtual server 2, and exporting the root of it
+  gather_facts: false
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+    share_name: ansible-test-nfs-export
+    virtualServerId: 2
+    filesystemPath: "/"
+  tasks:
+  - name: Get filesystem details
+    hv_hnas_facts: 
+      fact_type:
+      - filesystem_facts
+      <<: *login
+      data:
+        virtualServerId: "{{ virtualServerId }}"
+    register: result
+  - hv_hnas_share_export:
+      state: present
+      <<: *login
+      data:
+        name: "{{ share_name }}"
+        virtualServerId: "{{ virtualServerId }}"
+        filesystemId: "{{ result['ansible_facts']['filesystems'][0]['filesystemId'] }}"
+        filesystemPath: "{{ filesystemPath }}"
+        type: "nfs"
+    register: resultCreate
+  - debug: var=resultCreate
