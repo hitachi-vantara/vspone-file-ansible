@@ -1,0 +1,10 @@
+namespace: "hv"
+name: "hnas"
+version: "1.0.0"
+readme: "README.md"
+authors:
+    - "Hitachi Vantara"
+license:
+    - "MIT"
+tags:
+    - collection
