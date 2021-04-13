@@ -8,9 +8,9 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
-module: hv_hnas_storage_pool
+module: hnas_storage_pool
 short_description: This module manages Hitachi NAS storage pools
 description:
   - This module allows the creation and deletion of Hitachi NAS storage pools.
@@ -77,7 +77,7 @@ options:
 
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Create HNAS storage pool
   hosts: localhost
   gather_facts: false
@@ -87,7 +87,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hv_hnas_storage_pool:
+  - hitachi.hnas.hnas_storage_pool:
       state: present
       <<: *login
       data:
@@ -106,7 +106,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hv_hnas_storage_pool:
+    - hitachi.hnas.hnas_storage_pool:
         state: absent
         <<: *login
         data:
@@ -116,51 +116,7 @@ EXAMPLES = '''
 
 '''
 
-RETURN = '''
-[root@localhost ~]# ansible-playbook hv_create_storage_pool.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Create HNAS storage pool] *********************************************************************************************************************************
-
-TASK [hv_hnas_storage_pool] *************************************************************************************************************************************
-ok: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.storagePool": {
-        "chunkSize": 19327352832,
-        "freeCapacity": 2145310998528,
-        "isAssignedToLocalCluster": true,
-        "isFilesystemExpansionAllowed": true,
-        "isHealthy": true,
-        "isTiered": false,
-        "label": "ansible-pool",
-        "objectId": "3533313334363535303835333238303734353a3a3a3a3a3a303a3a3a4f49445f24232140255f56",
-        "storagePoolId": 531346550853280745,
-        "totalCapacity": 2145310998528,
-        "usedCapacity": 0
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_delete_storage_pool.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Delete HNAS storage pool] *********************************************************************************************************************************
-
-TASK [hv_hnas_storage_pool] *************************************************************************************************************************************
-ok: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.storagePool": ""
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+RETURN = r'''
 
 '''
 

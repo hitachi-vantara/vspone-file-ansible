@@ -8,9 +8,9 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
-module: hv_hnas_virtual_server
+module: hnas_virtual_server
 short_description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
 description:
   - This module can be used to ensure that a virtual server does or does not exist on a Hitachi NAS server.
@@ -82,7 +82,7 @@ options:
 
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 
 - name: Create Hitachi NAS virtual server
   hosts: localhost
@@ -92,7 +92,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hv_hnas_virtual_server:
+  - hitachi.hnas.hnas_virtual_server:
       <<: *login
       state: present
       data:
@@ -116,7 +116,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hv_hnas_virtual_server:
+  - hitachi.hnas.hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -133,7 +133,7 @@ EXAMPLES = '''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hv_hnas_virtual_server:
+  - hitachi.hnas.hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -143,82 +143,9 @@ EXAMPLES = '''
     register: result
   - debug: var=result.virtualServer
 
-
 '''
 
-RETURN = '''
-[root@localhost ~]# ansible-playbook hv_create_evs.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Create Hitachi NAS virtual server] ************************************************************************************************************************
-
-TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
-ok: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.virtualServer": {
-        "UUID": "0cf05696-1b0e-11d7-965f-9c5547075e75",
-        "ipAddresses": [
-            "172.27.5.15"
-            "172.27.5.16"
-        ],
-        "isEnabled": true,
-        "name": "evs-ansible",
-        "objectId": "333a3a3a3a3a3a303a3a3a4f49445f24232140255f56",
-        "status": "ONLINE",
-        "type": "File services",
-        "virtualServerId": 3
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_delete_evs.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Delete Hitachi NAS virtual server] ************************************************************************************************************************
-
-TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
-ok: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.virtualServer": ""
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_delete_evs_address.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Delete HNAS virtual server IP address] ********************************************************************************************************************
-
-TASK [hv_hnas_virtual_server] ***********************************************************************************************************************************
-ok: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.virtualServer": {
-        "UUID": "b38c5e30-1b33-11d7-977a-9c5547075e75",
-        "ipAddresses": [
-            "172.27.5.16"
-        ],
-        "isEnabled": true,
-        "name": "ansible",
-        "objectId": "333a3a3a3a3a3a303a3a3a4f49445f24232140255f56",
-        "status": "ONLINE",
-        "type": "File services",
-        "virtualServerId": 3
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+RETURN = r'''
 
 '''
 

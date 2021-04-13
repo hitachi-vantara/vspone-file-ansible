@@ -8,9 +8,9 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
-module: hv_hnas_share_export
+module: hnas_share_export
 short_description: This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers
 description:
   - This module creates and deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
@@ -169,10 +169,9 @@ options:
             type: str
             choices: ['ALIAS', 'COMPUTER', 'DELETED', 'DOMAIN', 'GROUP', 'INVALID', 'UNKNOWN', 'USER', 'WELLKNOWN']
 
-
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Create HNAS CIFS share
   hosts: localhost
   gather_facts: false
@@ -182,7 +181,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hv_hnas_share_export:
+  - hitachi.hnas.hnas_share_export:
       state: present
       <<: *login
       data:
@@ -204,7 +203,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hv_hnas_share_export:
+    - hitachi.hnas.hnas_share_export:
         state: absent
         <<: *login
         data:
@@ -216,61 +215,7 @@ EXAMPLES = '''
 
 '''
 
-RETURN = '''
-[root@localhost ~]# ansible-playbook hv_create_share.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Create HNAS CIFS share] ***********************************************************************************************************************************
-
-TASK [hv_hnas_share_export] *************************************************************************************************************************************
-changed: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.cifsShare": {
-        "filesystemId": "075E7582C745AEA10000000000000000",
-        "name": "ansible-cifs-share",
-        "objectId": "323a3a3a35336364653231382d316633322d313164372d393964632d3963353534373037356537353a3a3a303a3a3a4f49445f24232140255f56",
-        "path": "\\hello\\frank",
-        "settings": {
-            "accessConfig": "",
-            "cacheOption": "MANUAL_CACHING_DOCS",
-            "comment": "",
-            "isABEEnabled": false,
-            "isFollowGlobalSymbolicLinks": false,
-            "isFollowSymbolicLinks": false,
-            "isForceFileNameToLowercase": false,
-            "isScanForVirusesEnabled": false,
-            "maxConcurrentUsers": -1,
-            "snapshotOption": "SHOW_AND_ALLOW_ACCESS",
-            "transferToReplicationTargetSetting": "USE_FS_DEFAULT",
-            "userHomeDirectoryMode": "OFF",
-            "userHomeDirectoryPath": ""
-        },
-        "shareId": "53cde218-1f32-11d7-99dc-9c5547075e75",
-        "virtualServerId": 2
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_delete_share.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Delete HNAS CIFS share] ***********************************************************************************************************************************
-
-TASK [hv_hnas_share_export] *************************************************************************************************************************************
-changed: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.cifsShare": ""
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+RETURN = r'''
 
 '''
 

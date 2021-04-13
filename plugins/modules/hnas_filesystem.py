@@ -8,9 +8,9 @@ ANSIBLE_METADATA = {
     'supported_by': 'community'
 }
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
-module: hv_hnas_filesystem
+module: hnas_filesystem
 short_description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
 description:
   - This module can be used to create or delete filesystems on Hitachi NAS servers.
@@ -80,7 +80,7 @@ options:
       capacity:
         description:
         - Minimum capacity of the filesystem.
-        - The I(capacity) value will be dependent on the chunkSize of the storage pool.  See M(hv_hnas_storage_pool).
+        - The I(capacity) value will be dependent on the chunkSize of the storage pool.  See M(hnas_storage_pool).
         - The I(capacity) value should be used in conjunction with the I(capacity_unit) value.
         type: int
       status:
@@ -98,7 +98,7 @@ options:
 
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Create or Expand an HNAS filesystem
   hosts: localhost
   gather_facts: false
@@ -108,7 +108,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hv_hnas_filesystem:
+  - hitachi.hnas.hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -130,7 +130,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hv_hnas_filesystem:
+    - hitachi.hnas.hnas_filesystem:
         state: absent
         <<: *login
         data:
@@ -148,7 +148,7 @@ EXAMPLES = '''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hv_hnas_filesystem:
+  - hitachi.hnas.hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -163,116 +163,7 @@ EXAMPLES = '''
 
 '''
 
-RETURN = '''
-[root@localhost ~]# ansible-playbook hv_create_fs.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Create or expand an HNAS filesystem] **********************************************************************************************************************
-
-TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
-changed: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.filesystem": {
-        "blockSize": 4096,
-        "capacity": 19293798400,
-        "expansionLimits": 18446744073709551615,
-        "filesystemId": "075FA5699D6C5B4F0000000000000000",
-        "freeCapacity": 16986300416,
-        "isDedupeEnabled": false,
-        "isDedupeSupported": false,
-        "isLogicalCapacityFreeCapacityValid": true,
-        "isLogicalCapacityValid": true,
-        "isNDMPRecoveryTarget": false,
-        "isNonStrictWORM": false,
-        "isObjectReplicationTarget": false,
-        "isReadCached": false,
-        "isReadOnly": false,
-        "isSysLocked": false,
-        "isThinProvisioningEnabled": false,
-        "isThinProvisioningEnabledValid": true,
-        "isTrueSparseFileEnabled": true,
-        "isTrueSparseFileEnabledValid": true,
-        "isUnlimitedExpansion": true,
-        "isWORM": false,
-        "label": "ansible",
-        "logicalCapacity": 19293798400,
-        "logicalFreeCapacity": 16986300416,
-        "objectId": "30373546413536393944364335423446303030303030303030303030303030303a3a3a303a3a3a4f49445f24232140255f56",
-        "status": "MOUNTED",
-        "storagePoolId": 530991019344831952,
-        "usedCapacity": 2307497984,
-        "virtualServerId": 1
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_delete_fs.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Delete HNAS filesystem] ***********************************************************************************************************************************
-
-TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
-changed: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.filesystem": ""
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-
-[root@localhost ~]# ansible-playbook hv_unmount_fs.yml
-[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
-
-PLAY [Unmount an HNAS filesystem] *******************************************************************************************************************************
-
-TASK [hv_hnas_filesystem] ***************************************************************************************************************************************
-changed: [localhost]
-
-TASK [debug] ****************************************************************************************************************************************************
-ok: [localhost] => {
-    "result.filesystem": {
-        "blockSize": 4096,
-        "capacity": 19293798400,
-        "expansionLimits": 18446744073709551615,
-        "filesystemId": "075FA51B34E538F70000000000000000",
-        "freeCapacity": 16986927104,
-        "isDedupeEnabled": false,
-        "isDedupeSupported": false,
-        "isLogicalCapacityFreeCapacityValid": false,
-        "isLogicalCapacityValid": false,
-        "isNDMPRecoveryTarget": false,
-        "isNonStrictWORM": false,
-        "isObjectReplicationTarget": false,
-        "isReadCached": false,
-        "isReadOnly": false,
-        "isSysLocked": false,
-        "isThinProvisioningEnabled": false,
-        "isThinProvisioningEnabledValid": true,
-        "isTrueSparseFileEnabled": false,
-        "isTrueSparseFileEnabledValid": false,
-        "isUnlimitedExpansion": true,
-        "isWORM": false,
-        "label": "ansible",
-        "logicalCapacity": 0,
-        "logicalFreeCapacity": 0,
-        "objectId": "30373546413531423334453533384637303030303030303030303030303030303a3a3a303a3a3a4f49445f24232140255f56",
-        "status": "NOT_MOUNTED",
-        "storagePoolId": 530991019344831952,
-        "usedCapacity": 2306871296,
-        "virtualServerId": 1
-    }
-}
-
-PLAY RECAP ******************************************************************************************************************************************************
-localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+RETURN = r'''
 
 '''
 
