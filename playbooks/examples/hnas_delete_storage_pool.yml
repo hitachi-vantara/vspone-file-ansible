@@ -1,0 +1,18 @@
+- name: Delete HNAS storage pool - this will only work if the storage pool does not contain any filesystems
+  hosts: localhost
+  gather_facts: false
+  collections:
+  - hitachi.hnas
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_storage_pool:
+      state: absent
+      <<: *login
+      data:
+        label: "ansible-pool"
+    register: result
+  - debug: var=result.storagePool

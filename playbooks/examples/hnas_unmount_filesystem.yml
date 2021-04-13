@@ -1,13 +1,15 @@
-- hosts: localhost
-  name: Ensure the specific HNAS filesystem is present, and that it is in the "NOT_MOUNTED" state
+- name: Ensure the specific HNAS filesystem is present, and that it is in the "NOT_MOUNTED" state
+  hosts: localhost
   gather_facts: false
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hv_hnas_filesystem:
+  - hnas_filesystem:
       state: present
       <<: *login
       data:

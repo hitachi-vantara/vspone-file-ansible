@@ -1,6 +1,8 @@
-- hosts: localhost
-  name: Create an HNAS CIFS share, picking the first filesytem associated with virtual server 2, and exporting the path \non-root\ansible
+- name: Create an HNAS CIFS share, picking the first filesytem associated with virtual server 2, and exporting the path \non-root\ansible
+  hosts: localhost
   gather_facts: false
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -11,14 +13,14 @@
     filesystemPath: \non-root\ansible
   tasks:
   - name: Get filesystem details
-    hv_hnas_facts: 
+    hnas_facts: 
       fact_type:
       - filesystem_facts
       <<: *login
       data:
         virtualServerId: "{{ virtualServerId }}"
     register: result
-  - hv_hnas_share_export:
+  - hnas_share_export:
       state: present
       <<: *login
       data:

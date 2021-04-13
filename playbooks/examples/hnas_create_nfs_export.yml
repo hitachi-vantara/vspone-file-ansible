@@ -1,6 +1,8 @@
-- hosts: localhost
-  name: Creates an HNAS NFS Export, picking the first filesystem associated with virtual server 2, and exporting the root of it
+- name: Creates an HNAS NFS Export, picking the first filesystem associated with virtual server 2, and exporting the root of it
+  hosts: localhost
   gather_facts: false
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -11,14 +13,14 @@
     filesystemPath: "/"
   tasks:
   - name: Get filesystem details
-    hv_hnas_facts: 
+    hnas_facts: 
       fact_type:
       - filesystem_facts
       <<: *login
       data:
         virtualServerId: "{{ virtualServerId }}"
     register: result
-  - hv_hnas_share_export:
+  - hnas_share_export:
       state: present
       <<: *login
       data:

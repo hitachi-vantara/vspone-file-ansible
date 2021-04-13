@@ -1,6 +1,8 @@
-- hosts: localhost
-  name: Delete items provisioned in hv_provision_storage_and_evs.yml in the correct order
+- name: Delete items provisioned in hnas_provision_storage_and_evs.yml in the correct order
+  hosts: localhost
   gather_facts: false
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -8,7 +10,7 @@
       validate_certs: false
   tasks:
   - name: Get evs details
-    hv_hnas_facts: 
+    hnas_facts: 
       <<: *login
       fact_type:
         - virtual_server_facts
@@ -17,7 +19,7 @@
     register: hnas
 
   - name: Delete NFS export (need to lookup virtual server first to get the correct ID)
-    hv_hnas_share_export:
+    hnas_share_export:
       state: absent
       <<: *login
       data:
@@ -28,7 +30,7 @@
     with_items: "{{ hnas.ansible_facts.virtualServers }}"
 
   - name: Delete filesystem
-    hv_hnas_filesystem:
+    hnas_filesystem:
       state: absent
       <<: *login
       data:
@@ -36,7 +38,7 @@
     register: resultFs
 
   - name: Delete virtual server
-    hv_hnas_virtual_server:
+    hnas_virtual_server:
       state: absent
       <<: *login
       data:
@@ -44,7 +46,7 @@
     register: resultEvs
 
   - name: Delete storage pool
-    hv_hnas_storage_pool:
+    hnas_storage_pool:
       state: absent
       <<: *login
       data:

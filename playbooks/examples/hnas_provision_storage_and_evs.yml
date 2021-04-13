@@ -1,6 +1,8 @@
-- hosts: localhost
-  name: Get network aggregate ports, and use the information to create a new virtual server, storage pool, filesystem and NFS export
+- name: Get network aggregate ports, and use the information to create a new virtual server, storage pool, filesystem and NFS export
+  hosts: localhost
   gather_facts: false
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -8,13 +10,13 @@
       validate_certs: false
   tasks:
   - name: Get network ports
-    hv_hnas_facts: 
+    hnas_facts: 
       fact_type:
       - aggregate_port_facts
       <<: *login
     register: resultPort
   - name: Create virtual server
-    hv_hnas_virtual_server:
+    hnas_virtual_server:
       state: present
       <<: *login
       data:
@@ -26,7 +28,7 @@
           port: "{{ resultPort.ansible_facts.aggregatePorts[0] }}"
     register: resultEvs
   - name: Create storage pool
-    hv_hnas_storage_pool:
+    hnas_storage_pool:
       state: present
       <<: *login
       data:
@@ -35,7 +37,7 @@
         allow_denied_system_drives: yes
     register: resultPool
   - name: Create filesystem
-    hv_hnas_filesystem:
+    hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -46,7 +48,7 @@
         status: "MOUNTED"
     register: resultFs
   - name: Create NFS export
-    hv_hnas_share_export:
+    hnas_share_export:
       state: present
       <<: *login
       data:

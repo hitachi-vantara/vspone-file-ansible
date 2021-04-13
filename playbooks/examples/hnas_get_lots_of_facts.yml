@@ -1,5 +1,7 @@
-# get system facts, and then use virtualServers response to gather CIFS shares and NFS exports for each virtual server
-- hosts: localhost
+- name: Get system facts, and then use virtualServers response to gather CIFS shares and NFS exports for each virtual server
+  hosts: localhost
+  collections:
+  - hitachi.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -7,25 +9,25 @@
       validate_certs: false
   tasks:
   - name: Get system information, including node and evs details
-    hv_hnas_facts: 
+    hnas_facts: 
       <<: *login
       fact_type:
-        - system_facts
-        - system_drive_facts
-        - storage_pool_facts
-        - virtual_server_facts
-        - filesystem_facts
+      - system_facts
+      - system_drive_facts
+      - storage_pool_facts
+      - virtual_server_facts
+      - filesystem_facts
     register: result
   - debug: var=result
   - name: Get shares and exports
-    hv_hnas_facts: 
+    hnas_facts: 
       <<: *login
       fact_type:
-        - cifs_share_facts
-        - nfs_export_facts
+      - cifs_share_facts
+      - nfs_export_facts
       data:
         virtualServerId: "{{ item.virtualServerId }}"
     register: resultShareExports
     with_items:
-      - "{{ result['ansible_facts']['virtualServers'] }}"
+    - "{{ result['ansible_facts']['virtualServers'] }}"
   - debug: var=resultShareExports
