@@ -5,7 +5,7 @@ This collection works with Ansible 2.9+
 
 # Installation
 ```bash
-ansible-galaxy collection install hv-hnas-1.0.0.tar.gz
+ansible-galaxy collection install hitachi-hnas-1.0.0.tar.gz
 ```
 To use this collection, add the following to the top of your playbook
 ```
