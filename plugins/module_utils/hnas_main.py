@@ -187,12 +187,8 @@ class HNASFileServer:
 
 # return True if the share was deleted, False if it was not present
 # return <changed> <share>
-#################################
-# need to modify to return share if the SAAs need to be deleted
-#    changed = self.delete_cifs_authentications(self, shareId, params)
     def delete_share_or_export(self, virtualServerId, type, params):
         self.check_required_parameters(params, ['name'])
-#        assert 'name' in params, "Missing 'name' data value"
         name = self.check_share_export_name(type, params['name'])
         share_list = self.get_share_or_export(virtualServerId, type, name)
         if len(share_list['filesystemShares']) == 0:  # not there anyway, so can be considered absent
@@ -217,9 +213,7 @@ class HNASFileServer:
         data = {}
         data['virtualServerId'] = virtualServerId
         self.check_required_parameters(params, ['name', 'filesystemId'])
-#        assert 'name' in params, "Missing 'name' data value"
         data['name'] = self.check_share_export_name(type, params['name'])
-#        assert 'filesystemId' in params, "Missing 'filesystemId' data value"
         data['filesystemId'] = params['filesystemId']
         settings = {}
 # check to see if it already exists on the same virtual server
@@ -269,7 +263,6 @@ class HNASFileServer:
                     self.simple_patch(url, 204, data=data)
                     share_list = self.get_share_or_export(virtualServerId, type, data['name'])
                     share = share_list['filesystemShares'][0]
-############################
 # should see if SAA list needs to be added to
                 if type == 'cifs':
                     if self.add_cifs_authentications(share['objectId'], params):
@@ -283,7 +276,6 @@ class HNASFileServer:
                 return False, False, share
 # not present, so create it instead
         self.check_required_parameters(params, ['filesystemPath'])
-#        assert 'filesystemPath' in params, "Missing 'filesystemPath' data value"
         data['filesystemPath'] = params['filesystemPath']
         settings['accessConfig'] = params.get('accessConfig', "")
         settings['snapshotOption'] = params.get('snapshotOption', "SHOW_AND_ALLOW_ACCESS")
@@ -333,7 +325,7 @@ class HNASFileServer:
         return True
 
 # deletes a virtual server, or if ipAddres specified, it deletes the address from the virtual server
-# return two values <changed> <success> <evs>
+# return three values <changed> <success> <evs>
     def delete_virtual_server(self, virtualServerId=None, name=None, params=None):
         changed = False
         evs_list = self.get_virtual_servers(virtualServerId, name)
@@ -369,11 +361,8 @@ class HNASFileServer:
         evs = evs_list['virtualServers'][0]
         self.check_required_parameters(params, ['address', 'netmask', 'port'])
         data = {}
-#        assert 'address' in params, "Missing 'address' data value"
         data['ipAddress'] = params['address']
-#        assert 'netmask' in params, "Missing 'netmask' data value"
         data['mask'] = params['netmask']
-#        assert 'port' in params, "Missing 'port' data value"
         data['port'] = params['port']
         url = self.base_uri + "virtual-servers/{}/ip-addresses".format(evs['virtualServerId'])
         self.simple_post(url, 204, data=data)
@@ -383,7 +372,6 @@ class HNASFileServer:
     def create_virtual_server(self, params):
         data = {}
         self.check_required_parameters(params, ['name'])
-#        assert 'name' in params, "Missing 'name' data value"
         data['name'] = params['name']
         data['clusterNodeId'] = int(params.get('clusterNodeId', 1))
         status = params.get('status', 'ONLINE')
@@ -487,7 +475,6 @@ class HNASFileServer:
     def create_filesystem(self, params):
         data = {}
         self.check_required_parameters(params, ['label', 'capacity'])
-#        assert 'label' in params, "Missing 'label' data value"
         data['label'] = params['label']
         if 'virtual_server_name' in params:
             # need to get virtualServerId if name supplied
@@ -505,7 +492,6 @@ class HNASFileServer:
         else:
             assert 'storagePoolId' in params, "Missing 'storagePoolId' data value"
             data['storagePoolId'] = params['storagePoolId']
-#        assert 'capacity' in params, "Missing 'capacity' data value"
         data['capacity'] = self.get_unit_multiplier(params.get('capacity_unit', 'bytes')) * int(params['capacity'])
         status = params.get('status', 'MOUNTED')
         blockSize = params.get('blockSize', '4')
@@ -550,7 +536,6 @@ class HNASFileServer:
     def create_storage_pool(self, params):
         data = {'systemDrives':[]}
         self.check_required_parameters(params, ['label'])
-#        assert 'label' in params, "Missing 'label' data value"
         data['label'] = params['label']
         data['chunkSize'] = params.get('chunkSize', 19327352832) # appears to be the default chunk size value
         assert len(params['systemDrives']) >= 4, "Need a minimum of 4 system drives to create a storage pool"
@@ -624,7 +609,7 @@ class HNASFileServer:
                 self.simple_delete(url)
                 present = False
             if present == False:
-                # not there so add it - easier to add them one at time
+            # not there so add it - easier to add them one at time
                 url = self.base_uri + "filesystem-shares/cifs/{}/authentications".format(shareId)
                 data = {'cifsAuthentications':[]}
                 data['cifsAuthentications'].append(saa)
@@ -643,11 +628,3 @@ class HNASFileServer:
                 self.simple_delete(url)
                 changed = True
         return changed
-
-#    def delete_snapshot:
-#    def create_snapshot:
-#    def expand_storage_pool:
-#    def create_virtual_volume:
-#    def delete_virtual_volume:
-#    def create_virtual_volume_quota:
-#    def delete_virtual_volume_quota:

@@ -2,11 +2,11 @@ To build these modules into an installable Ansible Collection, which can then be
 
 In the root of the set of files run:
 
-ansible-galaxy build
+ansible-galaxy collection build
 
 Which will generate hitachi-hnas-1.x.x.tar.gz file in the root.  To force an overwrite of a previous build, run:
 
-ansible-galaxy build --force
+ansible-galaxy collection build --force
 
 To install the new Ansible Collection, run:
 
