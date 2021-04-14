@@ -1,4 +1,4 @@
-- name: Expand/ensure an existing HNAS filesystem is at least 40G - the omission of storage pool details means this would fail if the filesystem does not already exist 
+- name: Expand/ensure an HNAS filesystem is at least 40G - this operation is identical to the create filesystem, but the size should be increased if needed
   hosts: localhost
   gather_facts: false
   collections:
@@ -15,6 +15,7 @@
       data:
         label: "ansible"
         virtualServerId: 1
+        storage_pool_name: "ansible-pool"
         capacity_unit: gib
         capacity: 40
     register: result
