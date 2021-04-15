@@ -1,3 +1,6 @@
+
+# Copyright: (c) 2021, Hitachi Vantara, LTD
+
 import json
 import requests
 import re
@@ -281,6 +284,9 @@ class HNASFileServer:
         settings['snapshotOption'] = params.get('snapshotOption', "SHOW_AND_ALLOW_ACCESS")
         settings['transferToReplicationTargetSetting'] = params.get('transferToReplicationTargetSetting', "USE_FS_DEFAULT")
         if type == "nfs":
+            # need to remove / from beginning of NFS export due to legacy API bug in create operation, native API does not have the issue
+            if data['name'][0] == '/':
+                data['name'] = data['name'][1:]
             settings['localReadCacheOption'] = params.get('localReadCacheOption', "DISABLED")
         elif type == "cifs":
             settings['comment'] = params.get('comment', "")
