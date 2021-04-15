@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Put some comments here about what Hitachi Vantara's license is.
+# Copyright: (c) 2021, Hitachi Vantara, LTD
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -16,7 +17,7 @@ description:
   - This module can be used to create or delete filesystems on Hitachi NAS servers.
   - It can also be used to expand an existing filesystem, by increasing the capacity.
   - The state of filesystem can be set to mounted or unmounted by setting the I(status) appropriately.
-version_added: "0.1"
+version_added: "1.0.0"
 author: Hitachi Vantara, LTD.
 options:
   api_key:

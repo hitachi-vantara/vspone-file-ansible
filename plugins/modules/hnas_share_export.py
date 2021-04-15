@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Put some comments here about what Hitachi Vantara's license is.
+# Copyright: (c) 2021, Hitachi Vantara, LTD
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -16,7 +17,7 @@ description:
   - This module creates and deletes CIFS/SMB shares and NFS exports on Hitachi NAS servers.
   - It is also possible to update existing shares and exports by changing the supplied parameters.
   - For CIFS/SMB shares, share access authentications can also be updated.
-version_added: "0.1"
+version_added: "1.0.0"
 author: Hitachi Vantara, LTD.
 options:
   api_key:

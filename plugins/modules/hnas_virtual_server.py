@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Put some comments here about what Hitachi Vantara's license is.
+# Copyright: (c) 2021, Hitachi Vantara, LTD
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -15,7 +16,7 @@ short_description: This module creates/deletes Hitachi NAS virtual servers, and 
 description:
   - This module can be used to ensure that a virtual server does or does not exist on a Hitachi NAS server.
   - IP addresses can also be added or removed from virtual servers.
-version_added: "0.1"
+version_added: "1.0.0"
 author: Hitachi Vantara, LTD.
 options:
   api_key:

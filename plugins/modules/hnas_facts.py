@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Put some comments here about what Hitachi Vantara's license is.
+# Copyright: (c) 2021, Hitachi Vantara, LTD
+
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -15,7 +16,7 @@ short_description: This module gathers various facts about Hitachi NAS servers
 description:
   - This module gathers various facts about Hitachi NAS server.
   - It can gather storage details and also file serving details.
-version_added: "0.1"
+version_added: "1.0.0"
 author: Hitachi Vantara, LTD.
 options:
   api_key:
