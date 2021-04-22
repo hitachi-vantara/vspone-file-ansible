@@ -342,7 +342,7 @@ class HNASFileServer:
         if 'address_details' in params and len(params['address_details']) > 0:
             success = True
             for address in params['address_details']:                # walk around each one and check it's there
-                address_to_remove = address.get('address', "255.255.255.255")
+                address_to_remove = address.get('address', "255.255.255.255").lower()
                 if address_to_remove in evs['ipAddresses']:          # IP address present, so delete it
                     if len(evs['ipAddresses']) > 1:                  # will only attempt delete if not the last address
                         self.delete_virtual_server_address(virtualServerId, address_to_remove)
@@ -405,7 +405,7 @@ class HNASFileServer:
 # walk around each address in the list and check if it's there or not - if not create it
         if 'address_details' in params:                              # some IP address details supplied, so check they are all there
             for address in params['address_details']:                # walk around each one and check it's there
-                if address['address'] not in evs['ipAddresses']:     # IP address not already assigned to evs, so add
+                if address['address'].lower() not in evs['ipAddresses']:     # IP address not already assigned to evs, so add
                     self.add_vitual_server_address(virtualServerId=virtualServerId, params=address)
                     changed = True
         if evs['status'] != status:                          # not correct status, so change
