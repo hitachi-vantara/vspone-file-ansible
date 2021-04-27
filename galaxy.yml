@@ -1,13 +1,16 @@
-namespace: "hitachi"
-name: "hnas"
+namespace: hitachi
+name: hnas
 version: "1.0.0"
-readme: "README.md"
+readme: README.md
 authors:
-    - "Hitachi Vantara"
-description: "This collection provides a series of Ansible modules and plugins for interacting with Hitachi NAS storage systems"
-license:
-    - "MIT"
+- Hitachi Vantara, LTD
+description: This collection provides a series of Ansible modules and plugins for interacting with Hitachi NAS storage systems
+license_file:
+- LICENSE
 tags:
-    - collection
+- collection
+documentation: https://support.hitachivantara.com/
+homepage: https://www.hitachivantara.com/
 build_ignore:
-    - build_instructions.txt
+- build_instructions.txt
+- stuff

@@ -1,4 +1,5 @@
 To build these modules into an installable Ansible Collection, which can then be distributed, requires an install of Ansible 2.9 or newer.
+Before building a final release, put the latest version of the documentation in the docs directory, to include it in the installer.
 
 In the root of the set of files run:
 
