@@ -1,7 +1,9 @@
 # Hitachi NAS Ansible Collection
-This collection provides a series of Ansible modules and plugins for interacting with Hitachi NAS storge systems.
+This collection provides a series of Ansible modules and plugins for interacting with Hitachi NAS storage systems.
 
-This collection works with Ansible 2.9+
+This collection works with Ansible 2.9+, and has been tested with both Python2 and Python3.
+
+Copyright: (c) 2021, Hitachi Vantara, LTD
 
 # Installation
 ```bash
