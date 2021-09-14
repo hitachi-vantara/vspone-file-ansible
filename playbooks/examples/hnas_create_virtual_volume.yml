@@ -1,0 +1,38 @@
+- name: Create or update an HNAS virtual volume, and its associated quota
+  hosts: localhost
+  gather_facts: false
+  collections:
+  - hitachi.hnas
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_virtual_volume:
+      state: present
+      <<: *login
+      data:
+        name: "ansible-vv"
+        virtualServerId: 1
+        filesystemId: "075E75D0D373CA7D0000000000000000"
+        filesystemPath: "/ansible-vv"
+        emails: 
+        - bob@example.com
+        - dave@example.com
+        quota:
+          logEvent: true
+          diskUsageThreshold:
+            isHard: false
+            limit: 12345678
+            reset: 5
+            severe: 90
+            warning: 70
+          fileCountThreshold:
+            isHard: false
+            limit: 700
+            reset: 5
+            severe: 85
+            warning: 70
+    register: result
+  - debug: var=result.virtualVolume

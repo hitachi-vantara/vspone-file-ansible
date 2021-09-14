@@ -1,0 +1,28 @@
+- name: Get filesystem facts, and then use each filesystem to query virtual volume information
+  hosts: localhost
+  collections:
+  - hitachi.hnas
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - name: Get filesystem facts
+    hnas_facts: 
+      <<: *login
+      fact_type:
+      - filesystem_facts
+    register: result
+  - name: Get virtual volume facts for each filessytem
+    hnas_facts: 
+      <<: *login
+      fact_type:
+      - virtual_volume_facts
+      data:
+        virtualServerId: "{{ item.virtualServerId }}"
+        filesystemId: "{{ item.filesystemId }}"
+    register: resultVirtualVolumes
+    with_items:
+    - "{{ result['ansible_facts']['filesystems'] }}"
+  - debug: var=resultVirtualVolumes

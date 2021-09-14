@@ -1,0 +1,21 @@
+- name: Delete an HNAS virtual volume, and ensure the contents are also removed
+  hosts: localhost
+  gather_facts: false
+  collections:
+  - hitachi.hnas
+  vars:
+    login: &login
+      api_url: https://172.27.5.11:8444/v7
+      api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
+      validate_certs: false
+  tasks:
+  - hnas_virtual_volume:
+      state: absent
+      <<: *login
+      data:
+        name: "ansible-vv"
+        virtualServerId: 1
+        filesystemId: "075E75D0D373CA7D0000000000000000"
+        remove_content: true
+    register: result
+  - debug: var=result.virtualVolume
