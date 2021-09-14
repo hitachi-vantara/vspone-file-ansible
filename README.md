@@ -7,8 +7,13 @@ Copyright: (c) 2021, Hitachi Vantara, LTD
 
 # Installation
 ```bash
-ansible-galaxy collection install hitachi-hnas-1.0.0.tar.gz
+ansible-galaxy collection install hitachi-hnas-1.1.0.tar.gz
 ```
+If upgrading from a previous version of the Hitachi NAS Ansible modules, use the following installation command:
+```bash
+ansible-galaxy collection install --force hitachi-hnas-1.1.0.tar.gz
+```
+
 To use this collection, add the following to the top of your playbook
 ```
 collections:
@@ -16,7 +21,7 @@ collections:
 ```
 
 # Modules
-The collection is made up from five modules that can manage various aspects of Hitachi NAS systems.
+The collection is made up from six modules that can manage various aspects of Hitachi NAS systems.
 
 ## hnas_facts
 This module can be used to gather details about an HNAS system.  It includes physical details and file serving details.
@@ -32,3 +37,6 @@ This module manages Hitachi NAS virtual servers.  It can be used to ensure that 
 
 ## hnas_share_export
 This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers.  They can be created, deleted or updated.  For CIFS/SMB shares, the share access authentications can also be updated using this module.
+
+## hnas_virtual_volume
+This module allows the creation and deletion of Hitachi NAS virtual volumes.  It also allows the virtual volumes quota to be created and updated.
