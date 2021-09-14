@@ -52,6 +52,7 @@ options:
     -  C(snapshot_facts)       - gather a list of snapshots present on s particular filesystem
     -  C(network_port_facts)   - gather a list of the physical network ports available to each cluster node
     -  C(aggregate_port_facts) - gather a list of the aggregate network ports available to each cluster node
+    -  C(virtual_volume_facts) - gather details about virtual volumes and any associated quota, on a particular filesystem
     choices:
       system_facts:
         description: gather details about the HNAS cluster, including node information
@@ -73,6 +74,9 @@ options:
         description: gather a list of the physical network ports available to each cluster node
       aggregate_port_facts:
         description: gather a list of the aggregate network ports available to each cluster node
+      virtual_volume_facts:
+        description: gather details about virtual volumes and any associated quota, on a particular filesystem
+
     type: list
     elements: str
     required: true
@@ -217,6 +221,10 @@ def main():
             facts['networkPorts'] = hnas.get_network_interfaces(physical=True)['ports']
         if 'aggregate_port_facts' in fact_type:
             facts['aggregatePorts'] = hnas.get_network_interfaces(physical=False)['ports']
+        if 'virtual_volume_facts' in fact_type:
+            assert virtualServerId != None, "Missing 'virtualServerId' data value"
+            assert filesystemId != None, "Missing 'filesystemId' data value"
+            facts['virtualVolumes'] = hnas.get_virtual_volumes(virtualServerId=virtualServerId, filesystemId=filesystemId, name=name)['virtualVolumes']
 
     except:
         error = get_exception()

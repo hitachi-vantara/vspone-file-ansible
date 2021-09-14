@@ -263,7 +263,7 @@ class HNASFileServer:
                 if update_needed == True:
                     data['settings'] = settings
                     url = self.base_uri + "filesystem-shares/{}/{}".format(type, share['objectId'])
-                    self.simple_patch(url, 204, data=data)
+                    self.simple_patch(url, 204, data)
                     share_list = self.get_share_or_export(virtualServerId, type, data['name'])
                     share = share_list['filesystemShares'][0]
 # should see if SAA list needs to be added to
@@ -302,7 +302,7 @@ class HNASFileServer:
         data['settings'] = settings
 
         url = self.base_uri + "filesystem-shares/{}".format(type)
-        share = self.simple_post(url, 201, data=data)['filesystemShare']
+        share = self.simple_post(url, 201, data)['filesystemShare']
         if type == "cifs":
 # add SAA is specified
             self.add_cifs_authentications(share['objectId'], params)
@@ -371,7 +371,7 @@ class HNASFileServer:
         data['mask'] = params['netmask']
         data['port'] = params['port']
         url = self.base_uri + "virtual-servers/{}/ip-addresses".format(evs['virtualServerId'])
-        self.simple_post(url, 204, data=data)
+        self.simple_post(url, 204, data)
 
 # evs specific parameters are in the params dictionary
 # returns three values <changed> <success> <evs>
@@ -399,7 +399,7 @@ class HNASFileServer:
             assert 'netmask' in data, "Missing 'netmask' parameter from 'address_details' data value"
             assert 'ethernetLinkAggregation' in data, "Missing 'port' parameter from 'address_details' data value"
             url = self.base_uri + "virtual-servers"
-            evs = self.simple_post(url, 201, data=data)['virtualServer']
+            evs = self.simple_post(url, 201, data)['virtualServer']
             changed = True
         virtualServerId=evs['virtualServerId']
 # walk around each address in the list and check if it's there or not - if not create it
@@ -454,14 +454,14 @@ class HNASFileServer:
 
     def format_filesystem(self, filesystemId, blockSize):
         url = self.base_uri + "filesystems/{}/format".format(filesystemId)
-        format_data = {'blockSize': blockSize}
-        self.simple_post(url, 204, data=format_data)
+        data = {'blockSize': blockSize}
+        self.simple_post(url, 204, data)
         return True
         
     def expand_filesystem(self, filesystemId, capacity):
         url = self.base_uri + "filesystems/{}/expand".format(filesystemId)
-        format_data = {'capacity': capacity}
-        self.simple_post(url, 204, data=format_data)
+        data = {'capacity': capacity}
+        self.simple_post(url, 204, data)
         return True
 
     def delete_filesystem(self, label):
@@ -509,7 +509,7 @@ class HNASFileServer:
             fs = fs_list['filesystems'][0]
         else:                                            # not present, so create
             url = self.base_uri + "filesystems"
-            fs = self.simple_post(url, 201, data=data)['filesystem']
+            fs = self.simple_post(url, 201, data)['filesystem']
             changed = True
         filesystemId = fs['objectId']
         if int(fs['blockSize']) == 0:                    # not formatted, so can format it
@@ -577,10 +577,10 @@ class HNASFileServer:
             if 'allow_denied_system_drives' in params and params['allow_denied_system_drives'] is True and system_drive['isAccessAllowed'] == False:
                 url = self.base_uri + "system-drives/{}".format(systemDriveId)
                 sd_data = {'enableAccess':True}
-                self.simple_patch(url, 204, data=sd_data)
+                self.simple_patch(url, 204, sd_data)
 # need to create new pool
         url = self.base_uri + "storage-pools"
-        pool = self.simple_post(url, 201, data=data)['storagePool']
+        pool = self.simple_post(url, 201, data)['storagePool']
         return True, True, pool
 
     def get_cifs_authentications(self, shareId):
@@ -619,7 +619,7 @@ class HNASFileServer:
                 url = self.base_uri + "filesystem-shares/cifs/{}/authentications".format(shareId)
                 data = {'cifsAuthentications':[]}
                 data['cifsAuthentications'].append(saa)
-                self.simple_post(url, 201, data=data)
+                self.simple_post(url, 201, data)
                 changed = True
         return changed
         
@@ -634,3 +634,160 @@ class HNASFileServer:
                 self.simple_delete(url)
                 changed = True
         return changed
+
+    def get_virtual_volume_quota(self, virtualVolumeObjectId):
+        url = self.base_uri + "virtual-volumes/{}/quotas".format(virtualVolumeObjectId)
+        try:
+            virtualVolumeQuota = self.simple_get(url)
+# fix for spelling mistake in response for legacy REST API
+            if 'virtualVolumQuota' in virtualVolumeQuota:
+                quota = virtualVolumeQuota['virtualVolumQuota']['quota']
+            else:
+                quota = virtualVolumeQuota['virtualVolumeQuota']['quota']
+        except:
+            quota = {}
+        return quota
+
+    def get_virtual_volumes(self, virtualServerId, filesystemId, name=None):
+        url = self.base_uri + "virtual-volumes/{}/{}".format(virtualServerId, filesystemId)
+        if name != None:
+            url = self.append_to_url(url, "name={}".format(name))
+        virtual_volume_list = self.simple_get(url)
+        for virtual_volume in virtual_volume_list['virtualVolumes']:
+            virtual_volume['quota'] = self.get_virtual_volume_quota(virtual_volume['objectId'])
+        return virtual_volume_list
+
+# doesn't allow a virtual volume quota to be deleted separately
+    def delete_virtual_volume(self, params):
+        self.check_required_parameters(params, ['virtualServerId', 'filesystemId', 'name'])
+        virtual_volume_list = self.get_virtual_volumes(params['virtualServerId'], params['filesystemId'], params['name'])
+        if len(virtual_volume_list['virtualVolumes']) == 0:  # not there, so can be considered absent
+            return False
+# if the contents are deleted, then the virtual volume will also get deleted at the same time
+        virtual_volume = virtual_volume_list['virtualVolumes'][0]
+        folder_removed = False
+        if params.get('remove_content', False) == True:
+            folder_removed = self.delete_directory(params['filesystemId'], virtual_volume['path'])
+# if the path deletion failed, attempt to specifically remove the virtual volume
+        if folder_removed == False:
+            virtualVolumeObjectId = virtual_volume['objectId']
+            url = self.base_uri + "virtual-volumes/{}".format(virtualVolumeObjectId)
+            self.simple_delete(url)
+        return True
+
+    def get_quota_threshold(self, params, existing):
+        threshold = {}
+        reset = params.get('reset', existing.get('reset', 5))
+        warning = params.get('warning', existing.get('warning', 0))
+        severe = params.get('severe', existing.get('severe', 0))
+        assert severe <= 100 or warning <= 100 or reset <= 100, "Quota threshold levels cannot be greater than 100%"
+        assert severe >= warning, "Quota threshold warning level must be lower than severe"
+        if warning != 0:
+            assert warning >= reset, "Quota threshold reset level must be lower than warning"
+        threshold['limit'] = params.get('limit', existing.get('limit', 0))
+        threshold['isHard'] = params.get('isHard', existing.get('isHard', True))
+        threshold['reset'] = reset
+        threshold['warning'] = warning
+        threshold['severe'] = severe
+        return threshold
+
+    def create_virtual_volume(self, params):
+        data = {}
+        changed = False
+        self.check_required_parameters(params, ['virtualServerId', 'filesystemId', 'name'])
+        virtual_volume_list = self.get_virtual_volumes(params['virtualServerId'], params['filesystemId'], params['name'])
+        if len(virtual_volume_list['virtualVolumes']) != 0:  # already there, so can be considered present
+            virtual_volume = virtual_volume_list['virtualVolumes'][0]
+# allow updating of email address list - need to compare the two lists and update if different
+            if 'emails' in params:                  # emails list supplied, so check if it needs to be updated or not
+                updateRequired = False
+                for address in params['emails']:    # walk around each supplied email address and check if it's in the existing list
+                    if address not in virtual_volume['emails']:
+                        updateRequired = True
+                if len(params['emails']) != len(virtual_volume['emails']):
+                    updateRequired = True
+                if updateRequired == True:
+                    data['newVirtualVolumeName'] = params['name']
+                    data['emails'] = params['emails']
+                    url = self.base_uri + "virtual-volumes/{}".format(virtual_volume['objectId'])
+                    self.simple_patch(url, 204, data)
+                    changed = True
+        else:
+# this is where we create the virtual volume
+            data['virtualServerId'] = params['virtualServerId']
+            data['filesystemId'] = params['filesystemId']
+            data['virtualVolumeName'] = params['name']
+            self.check_required_parameters(params, ['filesystemPath'])
+            data['filesystemPath'] = params['filesystemPath']
+            data['createPathIfNotExists'] = True
+            data['emails'] = params.get('emails', [])
+            url = self.base_uri + "virtual-volumes"
+            virtual_volume = self.simple_post(url, 201, data)['virtualVolume']
+            changed = True
+# now need to look at the quota parameters - need to see if quota already exists,
+        if changed == True:
+            virtual_volume_list = self.get_virtual_volumes(params['virtualServerId'], params['filesystemId'], params['name'])
+            virtual_volume = virtual_volume_list['virtualVolumes'][0]
+
+        virtualVolumeObjectId = virtual_volume['objectId']
+        if 'quota' in params:                   # are the quota params in the yaml file - if they are check they are the same, otherwise ignore them
+            existing_quota = self.get_virtual_volume_quota(virtualVolumeObjectId)
+
+            quotaParams = params['quota']
+# build data structure first - same data used in create and update
+            updated_quota = {}
+            updated_quota['logEvent'] = quotaParams.get('logEvent', existing_quota.get('logEvent', False))
+            updated_quota['diskUsageThreshold'] = self.get_quota_threshold(quotaParams['diskUsageThreshold'], existing_quota.get('diskUsageThreshold', {}))
+            updated_quota['fileCountThreshold'] = self.get_quota_threshold(quotaParams['fileCountThreshold'], existing_quota.get('fileCountThreshold', {}))
+            url = self.base_uri + "virtual-volumes/{}/quotas".format(virtual_volume['objectId'])
+            if 'logEvent' in existing_quota:            # existing quota will have no content if a quota is yet to be created
+                if updated_quota['logEvent'] != existing_quota['logEvent'] or updated_quota['diskUsageThreshold'] != existing_quota['diskUsageThreshold'] or updated_quota['fileCountThreshold'] != existing_quota['fileCountThreshold']:
+                    self.simple_patch(url, 204, updated_quota)
+                    changed = True
+            else:                                       # otherwise create new one
+                self.simple_post(url, 201, updated_quota)
+                changed = True
+# get updated quota at the end to return
+        virtual_volume['quota'] = self.get_virtual_volume_quota(virtualVolumeObjectId)
+        return changed, True, virtual_volume
+
+    def get_sub_directory_object_id(self, filesystemId, folder, parentObjectId):
+        url = self.base_uri + "filesystems/{}/directories".format(filesystemId)
+        folderObjectId = None
+        if parentObjectId != None:
+            url += "/{}".format(parentObjectId)
+        try:
+            dir = self.simple_get(url)
+            for item in dir['directories']:
+                if item['displayName'][0] == folder:
+                    folderObjectId = item['objectId']
+        except:
+            folderObjectId = None
+        return folderObjectId
+
+    def get_directory_object_id(self, filesystemId, path):
+        pathObjectId = None
+# need to split path into objects and walk down the tree
+        parts = path.split('/')
+# will end up with empty item first, so need to remove that 
+        if parts[0] == "":
+            del parts[0]
+        dir_path = "/"
+        for part in parts:
+            dir_path = '/'.join([dir_path, part])
+            pathObjectId = self.get_sub_directory_object_id(filesystemId, dir_path, pathObjectId)
+            if pathObjectId == None:
+                return None
+        return pathObjectId
+
+    def delete_directory(self, filesystemId, path):
+# need to get root
+        pathObjectId = self.get_directory_object_id(filesystemId, path)
+        if pathObjectId == None:
+# path not found, so could be considered absent already
+            return False
+        url = self.base_uri + "filesystems/{}/directories/{}".format(filesystemId, pathObjectId)
+        self.simple_delete(url)
+        return True
+
+
