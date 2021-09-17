@@ -15,3 +15,4 @@ build_ignore:
 - build_instructions.txt
 - checksum.txt
 - stuff
+- readme.txt
