@@ -1,6 +1,6 @@
 namespace: hitachi
 name: hnas
-version: "1.1.0"
+version: "1.2.0"
 readme: README.md
 authors:
 - Hitachi Vantara, LTD
@@ -9,10 +9,7 @@ license_file:
 - LICENSE
 tags:
 - collection
-documentation: https://support.hitachivantara.com/
+documentation: https://docs.hitachivantara.com/v/u/en-us/nas-platform/mk-92hnas096
 homepage: https://www.hitachivantara.com/
 build_ignore:
-- build_instructions.txt
-- checksum.txt
-- stuff
 - readme.txt
