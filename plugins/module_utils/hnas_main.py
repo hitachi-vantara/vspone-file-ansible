@@ -1,5 +1,5 @@
 
-# Copyright: (c) 2021, Hitachi Vantara, LTD
+# Copyright: (c) 2021-2024, Hitachi Vantara, LTD
 
 import json
 import requests
@@ -377,6 +377,10 @@ class HNASFileServer:
 # returns three values <changed> <success> <evs>
     def create_virtual_server(self, params):
         data = {}
+        if int(self.version) > 7:
+            port_parameter_name = "port"
+        else:
+            port_parameter_name = "ethernetLinkAggregation"
         self.check_required_parameters(params, ['name'])
         data['name'] = params['name']
         data['clusterNodeId'] = int(params.get('clusterNodeId', 1))
@@ -388,7 +392,7 @@ class HNASFileServer:
             if 'netmask' in params['address_details'][0]:
                 data['netmask'] = params['address_details'][0]['netmask']
             if 'port' in params['address_details'][0]:
-                data['ethernetLinkAggregation'] = params['address_details'][0]['port']
+                data[port_parameter_name] = params['address_details'][0]['port']
         changed = False
         evs_list = self.get_virtual_servers(name=data['name'])
         if len(evs_list['virtualServers']) != 0:            # already there, so can be considered present
@@ -397,7 +401,7 @@ class HNASFileServer:
 # should get the fist IP address in the list to use
             assert 'ipAddress' in data, "Missing 'address' parameter from 'address_details' data value"
             assert 'netmask' in data, "Missing 'netmask' parameter from 'address_details' data value"
-            assert 'ethernetLinkAggregation' in data, "Missing 'port' parameter from 'address_details' data value"
+            assert port_parameter_name in data, "Missing 'port' parameter from 'address_details' data value"
             url = self.base_uri + "virtual-servers"
             evs = self.simple_post(url, 201, data)['virtualServer']
             changed = True
@@ -520,8 +524,8 @@ class HNASFileServer:
         if status != fs['status']:                       # not correct status, so change
             self.set_filesystem_state(filesystemId, state=status)
             changed = True
-        if data['capacity'] > fs['capacity']:            # capacity lower than size, so can expand
-            self.expand_filesystem(filesystemId, data['capacity'])
+        if int(data['capacity']) > int(fs['capacity']):  # capacity lower than size, so can expand
+            self.expand_filesystem(filesystemId, int(data['capacity']))
             changed = True
         if changed == True:
             fs = self.get_file_system(filesystemId)['filesystem']
@@ -552,7 +556,7 @@ class HNASFileServer:
         if len(pool_list['storagePools']) != 0:  # already there, so can be considered present
             pool = pool_list['storagePools'][0]
 # should get list of system drives, and compare
-            if 'chunkSize' in params and pool['chunkSize'] != data['chunkSize']:
+            if 'chunkSize' in params and int(pool['chunkSize']) != int(data['chunkSize']):
                 return False, False, ""
             url = self.base_uri + "storage-pools/{}/system-drives".format(pool['objectId'])
             sd_list = self.simple_get(url)
@@ -635,7 +639,8 @@ class HNASFileServer:
                 changed = True
         return changed
 
-    def get_virtual_volume_quota(self, virtualVolumeObjectId):
+# get virtual volume quotas using API version 7 or less
+    def get_virtual_volume_quota_v1(self, virtualVolumeObjectId):
         url = self.base_uri + "virtual-volumes/{}/quotas".format(virtualVolumeObjectId)
         try:
             virtualVolumeQuota = self.simple_get(url)
@@ -648,13 +653,38 @@ class HNASFileServer:
             quota = {}
         return quota
 
+# get virtual volume quotas using API version 8 or greater
+    def get_virtual_volume_quota_v2(self, virtualVolumeObjectId):
+        url = self.base_uri + "virtual-volumes/{}/quotas?targetType=VIRTUAL_VOLUME".format(virtualVolumeObjectId)
+        try:
+            virtualVolumeQuota = self.simple_get(url)['quotas'][0]
+            quota = virtualVolumeQuota['quota']
+            quota['quotaObjectId'] = virtualVolumeQuota['objectId']
+        except:
+            quota = {}
+        return quota
+
+    def get_virtual_volume_quota(self, virtualVolumeObjectId):
+# virtual volume quota behaviour changed between v7 and newer versions
+        if int(self.version) > 7:
+            quota = self.get_virtual_volume_quota_v2(virtualVolumeObjectId)
+        else:
+            quota = self.get_virtual_volume_quota_v1(virtualVolumeObjectId)
+        return quota
+
     def get_virtual_volumes(self, virtualServerId, filesystemId, name=None):
-        url = self.base_uri + "virtual-volumes/{}/{}".format(virtualServerId, filesystemId)
+        if int(self.version) > 7:
+            url = self.base_uri + "filesystems/{}/virtual-volumes".format(filesystemId)
+        else:
+            url = self.base_uri + "virtual-volumes/{}/{}".format(virtualServerId, filesystemId)
         if name != None:
             url = self.append_to_url(url, "name={}".format(name))
-        virtual_volume_list = self.simple_get(url)
-        for virtual_volume in virtual_volume_list['virtualVolumes']:
-            virtual_volume['quota'] = self.get_virtual_volume_quota(virtual_volume['objectId'])
+        try:
+            virtual_volume_list = self.simple_get(url)
+            for virtual_volume in virtual_volume_list['virtualVolumes']:
+                virtual_volume['quota'] = self.get_virtual_volume_quota(virtual_volume['objectId'])
+        except:
+            virtual_volume_list = {'virtualVolumes':[]}
         return virtual_volume_list
 
 # doesn't allow a virtual volume quota to be deleted separately
@@ -684,7 +714,7 @@ class HNASFileServer:
         assert severe >= warning, "Quota threshold warning level must be lower than severe"
         if warning != 0:
             assert warning >= reset, "Quota threshold reset level must be lower than warning"
-        threshold['limit'] = params.get('limit', existing.get('limit', 0))
+        threshold['limit'] = int(params.get('limit', existing.get('limit', 0)))
         threshold['isHard'] = params.get('isHard', existing.get('isHard', True))
         threshold['reset'] = reset
         threshold['warning'] = warning
@@ -741,6 +771,8 @@ class HNASFileServer:
             updated_quota['fileCountThreshold'] = self.get_quota_threshold(quotaParams['fileCountThreshold'], existing_quota.get('fileCountThreshold', {}))
             url = self.base_uri + "virtual-volumes/{}/quotas".format(virtual_volume['objectId'])
             if 'logEvent' in existing_quota:            # existing quota will have no content if a quota is yet to be created
+                if 'quotaObjectId' in existing_quota:   # different url is required to update quotas that have an objectId
+                    url = self.base_uri + "quotas/{}".format(existing_quota['quotaObjectId'])
                 if updated_quota['logEvent'] != existing_quota['logEvent'] or updated_quota['diskUsageThreshold'] != existing_quota['diskUsageThreshold'] or updated_quota['fileCountThreshold'] != existing_quota['fileCountThreshold']:
                     self.simple_patch(url, 204, updated_quota)
                     changed = True
