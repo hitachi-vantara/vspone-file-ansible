@@ -21,6 +21,15 @@ class HNASFileServer:
         self.verify = verify
         self.headers = {}
         self.headers['Content-Type'] = 'application/json'
+# setup a few parameter names which have changed between the different API versions
+        if int(self.version) > 7:
+            self.port_parameter_name = "port"
+            self.netmask_parameter_name = "netmask"
+            self.node_parameter_name = "nodeId"
+        else:
+            self.port_parameter_name = "ethernetLinkAggregation"
+            self.netmask_parameter_name = "mask"
+            self.node_parameter_name = "clusterNodeId"
 
     def set_credentials(self, api_key=None, api_username=None, api_password=None):
         self.api_key = api_key
@@ -218,6 +227,9 @@ class HNASFileServer:
         self.check_required_parameters(params, ['name', 'filesystemId'])
         data['name'] = self.check_share_export_name(type, params['name'])
         data['filesystemId'] = params['filesystemId']
+        data['ensurePathExists'] = True
+        if type == "nfs":
+            data['ignoreOverlap'] = True
         settings = {}
 # check to see if it already exists on the same virtual server
         share_list = self.get_share_or_export(virtualServerId, type, data['name'])
@@ -310,7 +322,7 @@ class HNASFileServer:
             share['cifsAuthentications'] = saa_list.get('cifsAuthentications', dict())
         return True, True, share
 
-    def set_vitrual_server_state(self, virtualServerId=None, name=None, state=None):
+    def set_virtual_server_state(self, virtualServerId=None, name=None, state=None):
         evs_list = self.get_virtual_servers(virtualServerId, name)
         assert len(evs_list['virtualServers']) != 0, "virtual server not found"
         evs = evs_list['virtualServers'][0]
@@ -354,7 +366,7 @@ class HNASFileServer:
             evs = evs_list['virtualServers'][0]
             return changed, success, evs
 # evs can only be deleted if it's disabled - any filesystems will be unmounted and unassigned, so not deleted
-        self.set_vitrual_server_state(virtualServerId=virtualServerId, name=name, state='DISABLED')
+        self.set_virtual_server_state(virtualServerId=virtualServerId, name=name, state='DISABLED')
         url = self.base_uri + "virtual-servers/{}".format(virtualServerId)
         self.simple_delete(url)
         changed = True
@@ -368,7 +380,7 @@ class HNASFileServer:
         self.check_required_parameters(params, ['address', 'netmask', 'port'])
         data = {}
         data['ipAddress'] = params['address']
-        data['mask'] = params['netmask']
+        data[self.netmask_parameter_name] = params['netmask']
         data['port'] = params['port']
         url = self.base_uri + "virtual-servers/{}/ip-addresses".format(evs['virtualServerId'])
         self.simple_post(url, 204, data)
@@ -377,13 +389,9 @@ class HNASFileServer:
 # returns three values <changed> <success> <evs>
     def create_virtual_server(self, params):
         data = {}
-        if int(self.version) > 7:
-            port_parameter_name = "port"
-        else:
-            port_parameter_name = "ethernetLinkAggregation"
         self.check_required_parameters(params, ['name'])
         data['name'] = params['name']
-        data['clusterNodeId'] = int(params.get('clusterNodeId', 1))
+        data[self.node_parameter_name] = int(params.get('clusterNodeId', 1))
         status = params.get('status', 'ONLINE')
 # if address_details are supplied, make sure there is at least one address
         if 'address_details' in params and len(params['address_details']) > 0:
@@ -392,7 +400,7 @@ class HNASFileServer:
             if 'netmask' in params['address_details'][0]:
                 data['netmask'] = params['address_details'][0]['netmask']
             if 'port' in params['address_details'][0]:
-                data[port_parameter_name] = params['address_details'][0]['port']
+                data[self.port_parameter_name] = params['address_details'][0]['port']
         changed = False
         evs_list = self.get_virtual_servers(name=data['name'])
         if len(evs_list['virtualServers']) != 0:            # already there, so can be considered present
@@ -401,7 +409,7 @@ class HNASFileServer:
 # should get the fist IP address in the list to use
             assert 'ipAddress' in data, "Missing 'address' parameter from 'address_details' data value"
             assert 'netmask' in data, "Missing 'netmask' parameter from 'address_details' data value"
-            assert port_parameter_name in data, "Missing 'port' parameter from 'address_details' data value"
+            assert self.port_parameter_name in data, "Missing 'port' parameter from 'address_details' data value"
             url = self.base_uri + "virtual-servers"
             evs = self.simple_post(url, 201, data)['virtualServer']
             changed = True
@@ -413,7 +421,7 @@ class HNASFileServer:
                     self.add_vitual_server_address(virtualServerId=virtualServerId, params=address)
                     changed = True
         if evs['status'] != status:                          # not correct status, so change
-            self.set_vitrual_server_state(virtualServerId=virtualServerId, state=status)
+            self.set_virtual_server_state(virtualServerId=virtualServerId, state=status)
             changed = True
         if changed == True:
             evs_list = self.get_virtual_servers(virtualServerId=virtualServerId)
@@ -655,7 +663,7 @@ class HNASFileServer:
 
 # get virtual volume quotas using API version 8 or greater
     def get_virtual_volume_quota_v2(self, virtualVolumeObjectId):
-        url = self.base_uri + "virtual-volumes/{}/quotas?targetType=VIRTUAL_VOLUME".format(virtualVolumeObjectId)
+        url = self.base_uri + "virtual-volumes/{}/quotas?targetType=VIRTUAL_VOLUME&pageSize=1".format(virtualVolumeObjectId)
         try:
             virtualVolumeQuota = self.simple_get(url)['quotas'][0]
             quota = virtualVolumeQuota['quota']
