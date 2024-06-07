@@ -1,13 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: (c) 2021, Hitachi Vantara, LTD
+# Copyright: (c) 2021-2034, Hitachi Vantara, LTD
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
 
 DOCUMENTATION = r'''
 ---
@@ -100,7 +95,7 @@ options:
 '''
 
 EXAMPLES = r'''
-- name: Create or Expand an HNAS filesystem
+- name: Create or Expand an Hitachi NAS filesystem
   hosts: localhost
   gather_facts: false
   vars:
@@ -122,7 +117,7 @@ EXAMPLES = r'''
   - debug: var=result.filesystem
 
 
-- name: Delete HNAS filesystem
+- name: Delete Hitachi NAS filesystem
   hosts: localhost
   gather_facts: false
   vars:
@@ -140,7 +135,7 @@ EXAMPLES = r'''
     - debug: var=result.filesystem
 
 
-- name: Unmount an HNAS filesystem
+- name: Unmount an Hitachi NAS filesystem
   hosts: localhost
   gather_facts: false
   vars:
@@ -217,10 +212,10 @@ def main():
 
     except:
         error = get_exception()
-        module.fail_json(msg="HNAS filesystem task failed on system at [%s] due to [%s]" % (api_url, str(error)))
+        module.fail_json(msg="Hitachi NAS filesystem task failed on system at [%s] due to [%s]" % (api_url, str(error)))
 
     result = dict(changed=changed, filesystem=filesystem)
-    module.exit_json(msg="HNAS filesystem task completed successfully on system at [%s]" % (hnas.get_address()), **result)
+    module.exit_json(msg="Hitachi NAS filesystem task completed successfully on system at [%s]" % (hnas.get_address()), **result)
 
 if __name__ == '__main__':
     main()

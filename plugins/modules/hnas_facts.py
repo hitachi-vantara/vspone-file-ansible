@@ -1,13 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: (c) 2021, Hitachi Vantara, LTD
+# Copyright: (c) 2021-2024, Hitachi Vantara, LTD
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
 
 DOCUMENTATION = r'''
 ---
@@ -55,7 +50,7 @@ options:
     -  C(virtual_volume_facts) - gather details about virtual volumes and any associated quota, on a particular filesystem
     choices:
       system_facts:
-        description: gather details about the HNAS cluster, including node information
+        description: gather details about the Hitachi NAS cluster, including node information
       virtual_server_facts:
         description: gather details about the virtual servers hosted on the cluster
       system_drive_facts:
@@ -205,7 +200,7 @@ def main():
         if 'system_drive_facts' in fact_type:
             facts['systemDrives'] = hnas.get_system_drives()['systemDrives']
         if 'storage_pool_facts' in fact_type:
-            facts['storagePools'] = hnas.get_storage_pools()['storagePools']
+            facts['storagePools'] = hnas.get_storage_pools(label=label)['storagePools']
         if 'filesystem_facts' in fact_type:
             facts['filesystems'] = hnas.get_file_systems(virtualServerId=virtualServerId, label=label)['filesystems']
         if 'nfs_export_facts' in fact_type:

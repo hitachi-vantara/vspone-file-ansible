@@ -1,13 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: (c) 2021, Hitachi Vantara, LTD
+# Copyright: (c) 2021-2024, Hitachi Vantara, LTD
 
-ANSIBLE_METADATA = {
-    'metadata_version': '1.1',
-    'status': ['preview'],
-    'supported_by': 'community'
-}
 
 DOCUMENTATION = r'''
 ---
@@ -194,10 +189,10 @@ def main():
 
     except:
         error = get_exception()
-        module.fail_json(msg="HNAS virtual server task failed on system at [%s] due of [%s]" % (api_url, str(error)))
+        module.fail_json(msg="Hitachi NAS virtual server task failed on system at [%s] due of [%s]" % (api_url, str(error)))
 
     result = dict(changed=changed, virtualServer=virtual_server)
-    module.exit_json(msg="HNAS virtual server task completed successfully on system at [%s]" % (hnas.get_address()), **result)
+    module.exit_json(msg="Hitachi NAS virtual server task completed successfully on system at [%s]" % (hnas.get_address()), **result)
 
 if __name__ == '__main__':
     main()
