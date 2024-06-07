@@ -1,4 +1,4 @@
-- name: Ensure that the specified share access authentications are not present on the HNAS CIFS share - the share is not deleted
+- name: Ensure that the specified share access authentications are not present on the Hitachi NAS CIFS share - the share is not deleted
   hosts: localhost
   gather_facts: false
   collections:

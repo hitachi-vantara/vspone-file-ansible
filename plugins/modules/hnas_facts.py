@@ -37,7 +37,7 @@ options:
   fact_type:
     description:
     - A list of required facts.  Valid list items are
-    -  C(system_facts)         - gather details about the HNAS cluster, including node information
+    -  C(system_facts)         - gather details about the Hitachi NAS cluster, including node information
     -  C(virtual_server_facts) - gather details about the virtual servers hosted on the cluster
     -  C(system_drive_facts)   - gather details about the system drives visible to the cluster
     -  C(storage_pool_facts)   - gather details about the storage pools hosted on the cluster

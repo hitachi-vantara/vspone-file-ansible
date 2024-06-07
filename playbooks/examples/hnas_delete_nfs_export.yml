@@ -1,4 +1,4 @@
-- name: Delete HNAS NFS Export from virtual server 2
+- name: Delete Hitachi NAS NFS Export from virtual server 2
   hosts: localhost
   gather_facts: false
   collections:

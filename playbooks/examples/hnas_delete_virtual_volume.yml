@@ -1,4 +1,4 @@
-- name: Delete an HNAS virtual volume, and ensure the contents are also removed
+- name: Delete Hitachi NAS virtual volume, and ensure the contents are also removed
   hosts: localhost
   gather_facts: false
   collections:

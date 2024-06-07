@@ -1,4 +1,4 @@
-- name: Ensure HNAS virtual server is present, with multiple IP addresses
+- name: Ensure Hitachi NAS virtual server is present, with multiple IP addresses
   hosts: localhost
   gather_facts: false
   collections:

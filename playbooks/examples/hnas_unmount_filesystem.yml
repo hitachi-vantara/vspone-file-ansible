@@ -1,4 +1,4 @@
-- name: Ensure the specific HNAS filesystem is present, and that it is in the "NOT_MOUNTED" state
+- name: Ensure the specific Hitachi NAS filesystem is present, and that it is in the "NOT_MOUNTED" state
   hosts: localhost
   gather_facts: false
   collections:

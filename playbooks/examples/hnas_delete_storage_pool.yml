@@ -1,4 +1,4 @@
-- name: Delete HNAS storage pool - this will only work if the storage pool does not contain any filesystems
+- name: Delete Hitachi NAS storage pool - this will only work if the storage pool does not contain any filesystems
   hosts: localhost
   gather_facts: false
   collections:

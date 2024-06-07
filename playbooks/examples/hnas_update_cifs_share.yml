@@ -1,4 +1,4 @@
-- name: Create or update an HNAS CIFS share, ensuring that the specified share authentications are present, and set a few of the parameters
+- name: Create or update an Hitachi NAS CIFS share, ensuring that the specified share authentications are present, and set a few of the parameters
   hosts: localhost
   gather_facts: false
   collections:

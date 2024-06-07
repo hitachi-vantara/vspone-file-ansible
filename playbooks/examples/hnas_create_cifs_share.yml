@@ -1,4 +1,4 @@
-- name: Create an HNAS CIFS share, picking the first filesytem associated with virtual server 2, and exporting the path \non-root\ansible
+- name: Create an Hitachi NAS CIFS share, picking the first filesytem associated with virtual server 2, and exporting the path \non-root\ansible
   hosts: localhost
   gather_facts: false
   collections:

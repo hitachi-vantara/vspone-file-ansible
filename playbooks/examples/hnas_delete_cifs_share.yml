@@ -1,4 +1,4 @@
-- name: Ensure a specific HNAS CIFS share is not present on the server
+- name: Ensure a specific Hitachi NAS CIFS share is not present on the server
   hosts: localhost
   gather_facts: false
   collections:

@@ -1,4 +1,4 @@
-- name: Create or update an HNAS virtual volume, and its associated quota
+- name: Create or update an Hitachi NAS virtual volume, and its associated quota
   hosts: localhost
   gather_facts: false
   collections:

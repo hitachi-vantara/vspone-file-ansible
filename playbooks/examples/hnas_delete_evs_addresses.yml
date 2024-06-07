@@ -1,4 +1,4 @@
-- name: Delete IP address from HNAS virtual server
+- name: Delete IP address from Hitachi NAS virtual server
   hosts: localhost
   gather_facts: false
   collections:

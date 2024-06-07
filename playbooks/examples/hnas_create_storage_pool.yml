@@ -1,4 +1,4 @@
-- name: Create HNAS storage pool.  The list of systemDrives needs to include at least 4 unused system drives
+- name: Create Hitachi NAS storage pool.  The list of systemDrives needs to include at least 4 unused system drives
   hosts: localhost
   gather_facts: false
   collections:

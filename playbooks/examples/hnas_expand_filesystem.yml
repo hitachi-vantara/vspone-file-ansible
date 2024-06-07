@@ -1,4 +1,4 @@
-- name: Expand/ensure an HNAS filesystem is at least 40G - this operation is identical to the create filesystem, but the size should be increased if needed
+- name: Expand/ensure Hitachi NAS filesystem is at least 40G - this operation is identical to the create filesystem, but the size should be increased if needed
   hosts: localhost
   gather_facts: false
   collections:

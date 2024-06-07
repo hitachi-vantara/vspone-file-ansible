@@ -1,4 +1,4 @@
-- name: Create HNAS filesystem on existing storage pool and associate with existing virtual server
+- name: Create Hitachi NAS filesystem on existing storage pool and associate with existing virtual server
   hosts: localhost
   gather_facts: false
   collections:

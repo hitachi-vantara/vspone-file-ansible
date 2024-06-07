@@ -1,4 +1,4 @@
-- name: Creates an HNAS NFS Export, picking the first filesystem associated with virtual server 2, and exporting the root of it
+- name: Creates an Hitachi NAS NFS Export, picking the first filesystem associated with virtual server 2, and exporting the root of it
   hosts: localhost
   gather_facts: false
   collections:
