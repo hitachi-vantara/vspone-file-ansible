@@ -21,7 +21,7 @@
       <<: *login
       data:
         name: "ansible-evs"
-        clusterNodeId: 1
+        nodeId: 1
         address_details:
         - address: "172.27.5.15"
           netmask: "255.255.192.0"

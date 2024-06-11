@@ -391,7 +391,7 @@ class HNASFileServer:
         data = {}
         self.check_required_parameters(params, ['name'])
         data['name'] = params['name']
-        data[self.node_parameter_name] = int(params.get('clusterNodeId', 1))
+        data[self.node_parameter_name] = int(params.get('nodeId', 1))
         status = params.get('status', 'ONLINE')
 # if address_details are supplied, make sure there is at least one address
         if 'address_details' in params and len(params['address_details']) > 0:

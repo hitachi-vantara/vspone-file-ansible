@@ -54,7 +54,7 @@ options:
         description: Name of the virtual server
         type: str
         required: true
-      clusterNodeId:
+      nodeId:
         description: Node that initially hosts the virtual server
         type: int
         default: 1
