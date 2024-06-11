@@ -37,9 +37,8 @@ options:
     default: true
   state:
     description:
-    - If I(state=present), ensure the existence of a share/export, and that it is in the requested state/configuration.
-    - If I(state=absent), ensure that specific share/export is not present on the server.
-    - should mention SAA
+    - If I(state=present), ensure the existence of a share/export, and that it is in the requested state/configuration, including CIFS/SMB share authentications.
+    - If I(state=absent), ensure that specific share/export is not present on the server. CIFS/SMB share authentications can also be removed (marked as absent) without removing the share.
     type: str
     required: true
     choices: ['present', 'absent']

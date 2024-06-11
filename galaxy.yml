@@ -8,7 +8,10 @@ description: This collection provides a series of Ansible modules and plugins fo
 license_file:
 - LICENSE
 tags:
-- collection
+- hitachi
+- hitachi-vantara
+- vsp
+- nas
 documentation: https://docs.hitachivantara.com/v/u/en-us/nas-platform/mk-92hnas096
 homepage: https://www.hitachivantara.com/
 build_ignore:
