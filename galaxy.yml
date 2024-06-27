@@ -9,10 +9,15 @@ license_file:
 - LICENSE
 tags:
 - hitachi
-- hitachi-vantara
+- hv
+- hitachi_vantara
 - vsp
+- vsp_one
+- storage
 - nas
-documentation: https://docs.hitachivantara.com/v/u/en-us/nas-platform/mk-92hnas096
+repository: https://github.com/hitachi-vantara/vspone-file-ansible
+documentation: https://github.com/hitachi-vantara/vspone-file-ansible
+issues: https://github.com/hitachi-vantara/vspone-file-ansible/issues
 homepage: https://www.hitachivantara.com/
 build_ignore:
 - readme.txt

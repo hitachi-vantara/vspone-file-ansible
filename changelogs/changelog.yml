@@ -1,0 +1,72 @@
+---
+releases:
+  1.2.0:
+    release_date: '2024-06-27'
+    changes:
+      release_summary: |
+        The modules have been updated to support v8 and v9 of the Hitachi NAS REST API, while maintaining compatability with v7 API.
+        Support has also been extended to the VSP One File platform.
+      minor_changes:
+      - hnas_virtual_server - clusterNodeId parameter changed to nodeId, which is now the same name as returned by the hnas_facts module
+    modules:
+    - name: hnas_facts
+      description: This module gathers various facts about Hitachi NAS servers
+      namespace: ''
+    - name: hnas_filesystem
+      description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
+      namespace: ''
+    - name: hnas_share_export
+      description: This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers
+      namespace: ''
+    - name: hnas_storage_pool
+      description: This module manages Hitachi NAS storage pools
+      namespace: ''
+    - name: hnas_virtual_server
+      description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
+      namespace: ''
+    - name: hnas_virtual_volume
+      description: This module manages Hitachi NAS virtual volumes
+      namespace: ''
+  1.1.0:
+    release_date: '2021-09-24'
+    changes:
+      release_summary: Added support for virtual volumes to existing Hitachi NAS functionality
+    modules:
+    - name: hnas_facts
+      description: This module gathers various facts about Hitachi NAS servers
+      namespace: ''
+    - name: hnas_filesystem
+      description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
+      namespace: ''
+    - name: hnas_share_export
+      description: This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers
+      namespace: ''
+    - name: hnas_storage_pool
+      description: This module manages Hitachi NAS storage pools
+      namespace: ''
+    - name: hnas_virtual_server
+      description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
+      namespace: ''
+    - name: hnas_virtual_volume
+      description: This module manages Hitachi NAS virtual volumes
+      namespace: ''
+  1.0.0:
+    release_date: '2021-04-28'
+    changes:
+      release_summary: This is the intial release of the Ansible modules for Hitachi NAS
+    modules:
+    - name: hnas_facts
+      description: This module gathers various facts about Hitachi NAS servers
+      namespace: ''
+    - name: hnas_filesystem
+      description: This module creates/deletes/expands/mount/unmount Hitachi NAS filesystems
+      namespace: ''
+    - name: hnas_share_export
+      description: This module manages CIFS/SMB shares and NFS exports on Hitachi NAS servers
+      namespace: ''
+    - name: hnas_storage_pool
+      description: This module manages Hitachi NAS storage pools
+      namespace: ''
+    - name: hnas_virtual_server
+      description: This module creates/deletes Hitachi NAS virtual servers, and adds/deletes IP addresses
+      namespace: ''
