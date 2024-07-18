@@ -1,11 +1,11 @@
 ---
 releases:
   1.2.0:
-    release_date: '2024-06-27'
+    release_date: '2024-07-31'
     changes:
       release_summary: |
         The modules have been updated to support v8 and v9 of the Hitachi NAS REST API, while maintaining compatability with v7 API.
-        Support has also been extended to the VSP One File platform.
+        Support has also been extended to the VSP One File platform.  The collection namespace has been changed to hitachivantara.hnas
       minor_changes:
       - hnas_virtual_server - clusterNodeId parameter changed to nodeId, which is now the same name as returned by the hnas_facts module
     modules:

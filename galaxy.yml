@@ -1,4 +1,4 @@
-namespace: hitachi
+namespace: hitachivantara
 name: hnas
 version: "1.2.0"
 readme: README.md

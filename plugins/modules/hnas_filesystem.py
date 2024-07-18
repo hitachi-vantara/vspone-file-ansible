@@ -104,7 +104,7 @@ EXAMPLES = r'''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hitachi.hnas.hnas_filesystem:
+  - hitachivantara.hnas.hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -126,7 +126,7 @@ EXAMPLES = r'''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-    - hitachi.hnas.hnas_filesystem:
+    - hitachivantara.hnas.hnas_filesystem:
         state: absent
         <<: *login
         data:
@@ -144,7 +144,7 @@ EXAMPLES = r'''
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
       validate_certs: false
   tasks:
-  - hitachi.hnas.hnas_filesystem:
+  - hitachivantara.hnas.hnas_filesystem:
       state: present
       <<: *login
       data:
@@ -168,7 +168,7 @@ import json
 from ansible.module_utils.api import basic_auth_argument_spec
 from ansible.module_utils.basic import AnsibleModule, get_exception
 
-import ansible_collections.hitachi.hnas.plugins.module_utils.hnas_main as server
+import ansible_collections.hitachivantara.hnas.plugins.module_utils.hnas_main as server
 
 
 def main():

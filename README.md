@@ -22,17 +22,23 @@ ansible-galaxy collection build
 ```
 - once the build has completed, run the following command to install the modules:
 ```bash
-ansible-galaxy collection install hitachi-hnas-1.2.0.tar.gz
+ansible-galaxy collection install hitachivantara-hnas-1.2.0.tar.gz
 ```
 - If upgrading from a previous version of the Hitachi NAS Ansible modules, use the following installation command instead:
 ```bash
-ansible-galaxy collection install --force hitachi-hnas-1.2.0.tar.gz
+ansible-galaxy collection install --force hitachivantara-hnas-1.2.0.tar.gz
 ```
 
 To use this collection, add the following to the top of your playbook
 ```
 collections:
-  - hitachi.hnas
+  - hitachivantara.hnas
+```
+
+**Note:** The collection namespace has been changed.  Any playbooks used with previous versions of this collection will require updating to use the new namespace, and the collection installed within the old namespace should be removed to avoid confusion
+```
+Old namespace:     hitachi.hnas
+Current namespace: hitachivantara.hnas
 ```
 
 ## Modules
@@ -60,7 +66,7 @@ The collection is made up from six modules that can view and manage various aspe
 
 Documentation is available directly from the Hitachi NAS Ansible modules using the following command:
 ```
-ansible-doc hitachi.hnas.hnas_facts
+ansible-doc hitachivantara.hnas.hnas_facts
 ```
 To view documentaion for others module within the collection, replace ```hnas_facts``` with the name of the module.
 

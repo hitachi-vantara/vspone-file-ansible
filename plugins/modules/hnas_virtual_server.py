@@ -88,7 +88,7 @@ EXAMPLES = r'''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hitachi.hnas.hnas_virtual_server:
+  - hitachivantara.hnas.hnas_virtual_server:
       <<: *login
       state: present
       data:
@@ -112,7 +112,7 @@ EXAMPLES = r'''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hitachi.hnas.hnas_virtual_server:
+  - hitachivantara.hnas.hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -129,7 +129,7 @@ EXAMPLES = r'''
       api_url: https://172.27.5.11:8444/v7
       api_key: BgB2qWZVkE.e53OLShtF3If9UIVdTNmvW9dS7ObPqYNPM83OQoeAj9
   tasks:
-  - hitachi.hnas.hnas_virtual_server:
+  - hitachivantara.hnas.hnas_virtual_server:
       <<: *login
       state: absent
       data:
@@ -150,7 +150,7 @@ import json
 from ansible.module_utils.api import basic_auth_argument_spec
 from ansible.module_utils.basic import AnsibleModule, get_exception
 
-import ansible_collections.hitachi.hnas.plugins.module_utils.hnas_main as server
+import ansible_collections.hitachivantara.hnas.plugins.module_utils.hnas_main as server
 
 
 def main():

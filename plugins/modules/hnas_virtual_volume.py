@@ -143,7 +143,7 @@ EXAMPLES = r'''
   hosts: localhost
   gather_facts: false
   collections:
-  - hitachi.hnas
+  - hitachivantara.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -183,7 +183,7 @@ EXAMPLES = r'''
   hosts: localhost
   gather_facts: false
   collections:
-  - hitachi.hnas
+  - hitachivantara.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
@@ -212,7 +212,7 @@ import json
 from ansible.module_utils.api import basic_auth_argument_spec
 from ansible.module_utils.basic import AnsibleModule, get_exception
 
-import ansible_collections.hitachi.hnas.plugins.module_utils.hnas_main as server
+import ansible_collections.hitachivantara.hnas.plugins.module_utils.hnas_main as server
 
 
 def main():

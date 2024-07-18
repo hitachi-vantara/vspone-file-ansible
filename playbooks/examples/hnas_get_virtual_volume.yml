@@ -1,7 +1,7 @@
 - name: Get virtual volume facts for a specific filesystem
   hosts: localhost
   collections:
-  - hitachi.hnas
+  - hitachivantara.hnas
   vars:
     login: &login
       api_url: https://172.27.5.11:8444/v7
