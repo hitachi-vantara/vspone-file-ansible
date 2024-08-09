@@ -1,0 +1,78 @@
+name: Publish Ansible Collection
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: List Docker images
+      run: docker images
+
+    - name: Cleanup old Docker images
+      run: |
+        # List all images and filter by the repository and tag, then remove them
+        docker images ghcr.io/${{ github.repository_owner }}/ansible-image --format "{{.ID}}" | xargs -r docker rmi
+
+    - name: Build Docker image
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/ansible-image:latest .
+
+    - name: Push Docker image to GitHub Container Registry
+      run: docker push ghcr.io/${{ github.repository_owner }}/ansible-image:latest
+
+    - name: Build Ansible Collection
+      run: docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/ansible-image:latest ansible-galaxy collection build --force
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: collection-tarball
+        path: |
+          *.tar.gz
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: collection-tarball
+        path: .
+
+    - name: Pull Docker image from GitHub Container Registry
+      run: docker pull ghcr.io/${{ github.repository_owner }}/ansible-image:latest
+
+    - name: Publish to Ansible Galaxy
+      env:
+        COLLECTION_NAME: "hitachivantara.hnas"
+        VERSION: "3.0.111"
+        API_KEY: ${{ secrets.ANSIBLE_COLLECTIONS_TOKEN }}
+      run: |
+        # Attempt to delete the existing collection (if supported)
+        # Note: This step requires API support for deletion
+        # Uncomment the line below if your Galaxy server supports API deletion
+        #curl -X DELETE "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index/hitachivantara/hnas/versions/3.0.124/" -H "Authorization: Token $API_KEY"
+        #curl -X DELETE "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/index/hitachivantara/hnas/" -H "Authorization: Token $API_KEY"
+        
+        # Sleep for 60 seconds to ensure the deletion is processed
+        #sleep 60
+
+        # Publish the collection
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/ansible-image:latest ansible-galaxy collection publish *.tar.gz --api-key $API_KEY
