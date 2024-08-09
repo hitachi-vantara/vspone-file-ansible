@@ -5,8 +5,8 @@ readme: README.md
 authors:
 - Hitachi Vantara, LTD
 description: This collection provides a series of Ansible modules and plugins for interacting with Hitachi NAS storage systems
-license_file:
-- LICENSE
+license:
+- GPL-3.0-or-later
 tags:
 - hitachi
 - hv
