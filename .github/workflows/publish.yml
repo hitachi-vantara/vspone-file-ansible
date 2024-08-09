@@ -22,16 +22,16 @@ jobs:
     - name: Cleanup old Docker images
       run: |
         # List all images and filter by the repository and tag, then remove them
-        docker images ghcr.io/${{ github.repository_owner }}/ansible-image --format "{{.ID}}" | xargs -r docker rmi
+        docker images ghcr.io/${{ github.repository_owner }}/hnas-ansible-image --format "{{.ID}}" | xargs -r docker rmi
 
     - name: Build Docker image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/ansible-image:latest .
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/hnas-ansible-image:latest .
 
     - name: Push Docker image to GitHub Container Registry
-      run: docker push ghcr.io/${{ github.repository_owner }}/ansible-image:latest
+      run: docker push ghcr.io/${{ github.repository_owner }}/hnas-ansible-image:latest
 
     - name: Build Ansible Collection
-      run: docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/ansible-image:latest ansible-galaxy collection build --force
+      run: docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/hnas-ansible-image:latest ansible-galaxy collection build --force
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
@@ -57,7 +57,7 @@ jobs:
         path: .
 
     - name: Pull Docker image from GitHub Container Registry
-      run: docker pull ghcr.io/${{ github.repository_owner }}/ansible-image:latest
+      run: docker pull ghcr.io/${{ github.repository_owner }}/hnas-ansible-image:latest
 
     - name: Publish to Ansible Galaxy
       env:
@@ -75,4 +75,4 @@ jobs:
         #sleep 60
 
         # Publish the collection
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/ansible-image:latest ansible-galaxy collection publish *.tar.gz --api-key $API_KEY
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/${{ github.repository_owner }}/hnas-ansible-image:latest ansible-galaxy collection publish *.tar.gz --api-key $API_KEY
